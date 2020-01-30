@@ -111,7 +111,7 @@ function Brand:Combo()
   local target = nil
 
   target = self:GetTarget(900)
-  if IsValid(target) then
+  if self.Menu.combo.W:Value() and Ready(_W) and IsValid(target) then
     if target and self.Menu.combo.W:Value() then
       self:CastW(target)
     end
@@ -189,7 +189,7 @@ end
 
 function Brand:Harass()
   local  target = self:GetTarget(900)
-  if target and self.Menu.harass.W:Value() then
+  if self.Menu.harass.W:Value() and target  and Ready(_W) and IsValid(target) then
     self:CastW(target)
   end
 end
