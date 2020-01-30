@@ -30,6 +30,7 @@
  lastMove = 0
  lastR = 0
  lastIG = 0
+ lastEX = 0
 
  Enemys =   {}
  Allys  =   {}

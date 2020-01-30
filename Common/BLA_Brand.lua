@@ -5,7 +5,7 @@ require('PussyDamageLib')
 class "Brand"
 
 function Brand:__init()
-  print("ini 1")
+  
   self.Q = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Speed = 1600 , range = 1050, width = 60, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
   self.W = {Type = _G.SPELLTYPE_CIRCLE, Delay = 0.9, Speed = math.huge , range = 900, radius = 200}
   self.E = {range = 625}
@@ -37,8 +37,8 @@ function Brand:__init()
 end
 
 function Brand:LoadMenu()
-  print("teste 2")
-  self.Menu = MenuElement({type = MENU, id = "BLABrand", name = "BotLane Brand",  leftIcon = "https://raw.githubusercontent.com/deficientegamer/SoldierBotLaneAIO/master/fire.png"})
+  
+  self.Menu = MenuElement({type = MENU, id = "BLABrand", name = "BotLaneAIO Brand RC 0.2"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
@@ -48,6 +48,7 @@ function Brand:LoadMenu()
   self.Menu.combo:MenuElement({id = "minQ", name = "Q min distance in Combo", value = 320, min = 0, max = 625, step = 1})
   self.Menu.combo:MenuElement({id = "minComboR", name = "R min enemy's in Combo", value = 1, min = 1, max = 5, step = 1})
   self.Menu.combo:MenuElement({id = "iginite", name = "Ignite in Combo", value = true})
+  self.Menu.combo:MenuElement({id = "ignitehp", name = "Ignite HP:", value = 35, min = 5, max = 95, identifier = "%"})
   self.Menu.combo:MenuElement({id = "exaust", name = "Exhaust in Combo", value = true})
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
@@ -72,7 +73,7 @@ function Brand:LoadMenu()
   self.Menu.lastHit:MenuElement({id = "Q", name = "Q", value = true})
 
   self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape"})
-  self.Menu.lastHit:MenuElement({id = "exaust", name = "Exhaust", value = true})
+  self.Menu.escape:MenuElement({id = "exaust", name = "Exhaust", value = true})
 
   self.Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
   self.Menu.Drawing:MenuElement({id = "Q", name = "Draw [Q] Range", value = true})
@@ -101,7 +102,7 @@ function Brand:Tick()
   elseif Orb.Modes[ORBWALKER_MODE_LASTHIT] then
     self:LastHit()
   elseif Orb.Modes[ORBWALKER_MODE_FLEE] then
-    self:castExaustEscape()
+    self:castExaust()
   end
 
 end
@@ -255,20 +256,17 @@ end
 
 function Brand:Draw()
   if myHero.dead then return  end
-
-  if self.Menu.Drawing.Q:Value() and Ready(_Q) then
-    Draw.Circle(myHero.pos, 1050,Draw.Color(255,0,255,0))
-  end
-
-  if self.Menu.Drawing.W:Value() and Ready(_W) then
-    Draw.Circle(myHero.pos, 900,Draw.Color(0 ,255,0,255))
-  end
-
-  if self.Menu.Drawing.E:Value() and Ready(_E) then
-    Draw.Circle(myHero.pos, 625,Draw.Color(0 ,0,255,0))
-  end
   if self.Menu.Drawing.R:Value() and Ready(_R) then
-    Draw.Circle(myHero.pos, 750,Draw.Color(0 ,0,0,255))
+    Draw.Circle(myHero, 750, 1, Draw.Color(255, 225, 255, 10))
+  end
+  if self.Menu.Drawing.Q:Value() and Ready(_Q) then
+    Draw.Circle(myHero, 1050, 1, Draw.Color(225, 225, 0, 10))
+  end
+  if self.Menu.Drawing.E:Value() and Ready(_E) then
+    Draw.Circle(myHero, 625, 1, Draw.Color(225, 225, 125, 10))
+  end
+  if self.Menu.Drawing.W:Value() and Ready(_W) then
+    Draw.Circle(myHero, 900, 1, Draw.Color(225, 225, 125, 10))
   end
 end
 
@@ -361,86 +359,44 @@ function Brand:Auto()
 end
 
 function Brand:castIginite()
-  if self.Menu.combo.iginite:Value() then return end
+   if self.Menu.combo.ignite:Value() == false then return end
+  if myHero.dead then return end
+  for i = 1, #Enemys do
+    local target = Enemys[i]
+    if IsValid(target) then
+      local TargetHp = target.health/target.maxHealth
 
-  if myHero:GetSpellData(SUMMONER_1).name ~= "SummonerDot" and myHero:GetSpellData(SUMMONER_2).name ~= "SummonerDot" then return end
-  if lastIG + 250 > GetTickCount() then return end
-  local IGdamage = 80 * myHero.levelData.lvl
-  for enemyk , enemy in pairs(Enemys) do
-    if IsValid(enemy) and enemy.pos:DistanceTo(myHero.pos) < 600 then
-      if myHero:GetSpellData(SUMMONER_1).name == "SummonerDot" and myHero:GetSpellData(SUMMONER_1).currentCd == 0 then
-        if IGdamage >= enemy.health then
-          Control.CastSpell(HK_SUMMONER_1, enemy.pos)
-          lastIG = GetTickCount()
-          return
+      if TargetHp <= self.Menu.combo.ignitehp:Value()/100 and myHero.pos:DistanceTo(target.pos) <= 600 then
+        if myHero:GetSpellData(SUMMONER_1).name == "SummonerDot" and Ready(SUMMONER_1) then
+          Control.CastSpell(HK_SUMMONER_1, target)
+        elseif myHero:GetSpellData(SUMMONER_2).name == "SummonerDot" and Ready(SUMMONER_2) then
+          Control.CastSpell(HK_SUMMONER_2, target)
+
         end
-      end
 
-
-
-      if myHero:GetSpellData(SUMMONER_2).name == "SummonerDot" and myHero:GetSpellData(SUMMONER_2).currentCd == 0 then
-        if IGdamage >= enemy.health then
-          Control.CastSpell(HK_SUMMONER_2, enemy.pos)
-          lastIG = GetTickCount()
-          return
-        end
       end
     end
   end
 
 end
 
-
+-- ok
 function Brand:castExaust()
-  if self.Menu.combo.exaust:Value() then return end
-
-  if myHero:GetSpellData(SUMMONER_1).name ~= "SummonerExhaust" and myHero:GetSpellData(SUMMONER_2).name ~= "SummonerExhaust" then return end
-  if lastEX + 250 > GetTickCount() then return end
-  for enemyk , enemy in pairs(Enemys) do
-    if IsValid(enemy) and enemy.pos:DistanceTo(myHero.pos) < 600
-        and myHero.health >= enemy.health then
-      if myHero:GetSpellData(SUMMONER_1).name == "SummonerExhaust" and myHero:GetSpellData(SUMMONER_1).currentCd == 0 then
-        Control.CastSpell(HK_SUMMONER_1, enemy.pos)
-        lastEX = GetTickCount()
-        return
+  if self.Menu.combo.exaust:Value() == false then return end
+  if myHero.dead then return end
+  for i = 1, #Enemys do
+    local target = Enemys[i]
+    if IsValid(target) then
+      if myHero.pos:DistanceTo(target.pos) <= 650  then
+        if myHero:GetSpellData(SUMMONER_1).name == "SummonerExhaust" and Ready(SUMMONER_1) then
+          Control.CastSpell(HK_SUMMONER_1, target)
+        elseif myHero:GetSpellData(SUMMONER_2).name == "SummonerExhaust" and Ready(SUMMONER_2) then
+          Control.CastSpell(HK_SUMMONER_2, target)
+        end
       end
 
-
-
-      if myHero:GetSpellData(SUMMONER_2).name == "SummonerExhaust" and myHero:GetSpellData(SUMMONER_2).currentCd == 0 then
-        Control.CastSpell(HK_SUMMONER_1, enemy.pos)
-        lastEX = GetTickCount()
-        return
-      end
     end
   end
-
-end
-
-
-function Brand:castExaustEscape()
-  if self.Menu.combo.exaust:Value() then return end
-
-  if myHero:GetSpellData(SUMMONER_1).name ~= "SummonerExhaust" and myHero:GetSpellData(SUMMONER_2).name ~= "SummonerExhaust" then return end
-  if lastEX + 250 > GetTickCount() then return end
-  for enemyk , enemy in pairs(Enemys) do
-    if IsValid(enemy) and enemy.pos:DistanceTo(myHero.pos) < 600 then
-      if myHero:GetSpellData(SUMMONER_1).name == "SummonerExhaust" and myHero:GetSpellData(SUMMONER_1).currentCd == 0 then
-        Control.CastSpell(HK_SUMMONER_1, enemy.pos)
-        lastEX = GetTickCount()
-        return
-      end
-
-
-
-      if myHero:GetSpellData(SUMMONER_2).name == "SummonerExhaust" and myHero:GetSpellData(SUMMONER_2).currentCd == 0 then
-        Control.CastSpell(HK_SUMMONER_1, enemy.pos)
-        lastEX = GetTickCount()
-        return
-      end
-    end
-  end
-
 end
 
 function Brand:CastW(target)

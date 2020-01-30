@@ -14,14 +14,7 @@ end
 -- globals
 local version = 0.01
 local hero = myHero.charName
-
-local heroStringList = {
-    ["Brand"]       =     true
-
-}
-
-
-
-if heroStringList[hero] then
-     require("BLA_".. hero)
+if hero == "Brand" then
+  print("Load BotLane AIO By AcessibilitySoldier")
+  require("BLA_".. hero)
 end
