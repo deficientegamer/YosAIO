@@ -47,7 +47,7 @@ function Brand:LoadMenu()
   self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
   self.Menu.combo:MenuElement({id = "minQ", name = "Q min distance in Combo", value = 320, min = 0, max = 625, step = 1})
   self.Menu.combo:MenuElement({id = "minComboR", name = "R min enemy's in Combo", value = 1, min = 1, max = 5, step = 1})
-  self.Menu.combo:MenuElement({id = "iginite", name = "Ignite in Combo", value = true})
+  self.Menu.combo:MenuElement({id = "ignite", name = "Ignite in Combo", value = true})
   self.Menu.combo:MenuElement({id = "ignitehp", name = "Ignite HP:", value = 35, min = 5, max = 95, identifier = "%"})
   self.Menu.combo:MenuElement({id = "exaust", name = "Exhaust in Combo", value = true})
 
