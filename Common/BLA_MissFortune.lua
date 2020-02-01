@@ -307,5 +307,5 @@ function MissFortune:GetTargetInRange(range, target)
   return counter
 end
 
--- By sikaka
 MissFortune()
+
