@@ -141,9 +141,9 @@ function MissFortune:Combo()
   -- R Start
   for i = 1, #Enemys do
     local hero = Enemys[i]
-    local numAround = self:GetTargetInRange(1200, hero)
+    local numAround = self:GetTargetInRange(900, hero)
     local RDmg = getdmg("R", hero, myHero, 1)
-    local count = self:GetTargetInRange(480, hero) -- inimigos proximo ao alvo
+    local count = self:GetTargetInRange(410, hero) -- inimigos proximo ao alvo
     if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
       and Ready(_R) then
       if self.Menu.combo.R:Value() and  Orb.Modes[ORBWALKER_MODE_COMBO]
