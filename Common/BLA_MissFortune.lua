@@ -51,7 +51,7 @@ function MissFortune:LoadMenu()
   self.Menu.combo:MenuElement({id = "maxQ", name = "Q max distance in Combo", value = 650, min = 0, max = 650, step = 1})
   self.Menu.combo:MenuElement({id = "maxDistanceR", name = "R max distance in Combo", value = 920, min = 0, max = 1400, step = 1})
   self.Menu.combo:MenuElement({id = "rangeDistanceR", name = "R max distance for count enemys", value = 440, min = 0, max = 800, step = 1})
-  self.Menu.combo:MenuElement({id = "dmgForOlnyEnemyR", name = "R DMG Loss Perc For Only enemy", value = 13, min = 10, max = 20, step = 1})
+  self.Menu.combo:MenuElement({id = "dmgForOlnyEnemyR", name = "R DMGLP for only enemy", value = 13, min = 10, max = 20, step = 1})
   self.Menu.combo:MenuElement({id = "minComboR", name = "R min enemy's in Combo", value = 2, min = 1, max = 5, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
