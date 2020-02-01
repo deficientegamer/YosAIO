@@ -49,9 +49,6 @@ function MissFortune:LoadMenu()
   self.Menu.combo:MenuElement({id = "E", name = "E", value = true})
   self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
   self.Menu.combo:MenuElement({id = "maxQ", name = "Q max distance in Combo", value = 650, min = 0, max = 650, step = 1})
-  self.Menu.combo:MenuElement({id = "maxDistanceR", name = "R max distance in Combo", value = 920, min = 0, max = 1400, step = 1})
-  self.Menu.combo:MenuElement({id = "rangeDistanceR", name = "R max distance for count enemys", value = 440, min = 0, max = 800, step = 1})
-  self.Menu.combo:MenuElement({id = "dmgForOlnyEnemyR", name = "R DMGLP for only enemy", value = 13, min = 10, max = 20, step = 1})
   self.Menu.combo:MenuElement({id = "minComboR", name = "R min enemy's in Combo", value = 2, min = 1, max = 5, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
@@ -144,13 +141,14 @@ function MissFortune:Combo()
   -- R Start
   for i = 1, #Enemys do
     local hero = Enemys[i]
-    local numAround = self:GetTargetInRange(self.Menu.combo.maxDistanceR:Value(), hero)
+    local numAround = self:GetTargetInRange(940, hero)
     local RDmg = getdmg("R", hero, myHero, 1)
-    local count = self:GetTargetInRange(self.Menu.combo.rangeDistanceR:Value(), hero) -- inimigos proximo ao alvo
+    local count = self:GetTargetInRange(420, hero) -- inimigos proximo ao alvo
     if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
       and Ready(_R) then
+    
       if self.Menu.combo.R:Value() 
-        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/(self.Menu.combo.dmgForOlnyEnemyR:Value()/10) > hero.health)  then
+        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.6 > hero.health)  then
         _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
         inUlt=true
         Control.CastSpell(HK_R, hero)
@@ -310,5 +308,5 @@ function MissFortune:GetTargetInRange(range, target)
   return counter
 end
 
--- By sikaka
+
 MissFortune()
