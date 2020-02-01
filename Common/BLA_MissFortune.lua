@@ -177,7 +177,7 @@ function MissFortune:Harass()
 
 
   -- Q Start only 2 targets
-  local target = GetTarget(self.Q.range, true)
+  local target = self:GetTarget(self.Q.range, true)
   local bounceTarget = GetQBounceTarget(target)
   if IsValid(bounceTarget) and LocalStringFind(bounceTarget.type, "Hero") then
     if self.Menu.harass.Q:Value() then
