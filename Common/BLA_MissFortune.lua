@@ -172,7 +172,7 @@ function MissFortune:Harass()
 
   local  targetE = self:GetTarget(1000)
   if self.Menu.harass.E:Value() and targetE and Ready(_E) and IsValid(targetE) then
-    self:CastW(target)
+     CastSpell(HK_E,target)
   end
 
 
