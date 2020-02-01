@@ -4,6 +4,7 @@ require('PussyDamageLib')
 
 local LocalTableSort        = table.sort
 local LocalStringFind       = string.find
+local inUlt = false
 
 class "MissFortune"
 
@@ -176,7 +177,7 @@ function MissFortune:Harass()
 
 
   -- Q Start only 2 targets
-  local target = GetTarget(Q.Range, true)
+  local target = GetTarget(self.Q.range, true)
   local bounceTarget = GetQBounceTarget(target)
   if IsValid(bounceTarget) and LocalStringFind(bounceTarget.type, "Hero") then
     if self.Menu.harass.Q:Value() then
