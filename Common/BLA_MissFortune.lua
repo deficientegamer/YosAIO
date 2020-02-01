@@ -4,6 +4,7 @@ require('PussyDamageLib')
 
 local LocalTableSort        = table.sort
 local LocalStringFind       = string.find
+local inUlt                 = false
 
 class "MissFortune"
 
@@ -78,7 +79,6 @@ function MissFortune:Tick()
     return
   end
 
-  --self:Auto()
 
   if Orb.Modes[ORBWALKER_MODE_COMBO] then
     self:Combo()
@@ -100,34 +100,36 @@ end
 
 function MissFortune:Combo()
   local target = nil
+
   -- E Start
   target = self:GetTarget(690)
-  if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
-    if target and self.Menu.combo.E:Value() then
-      self:CastE(target)
+  if inUlt == false then
+    if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
+      if target and self.Menu.combo.E:Value() then
+        self:CastE(target)
+      end
     end
-  end
-  -- E End
+    -- E End
 
-  -- W Start
-  if self.Menu.combo.W:Value()  and lastW +120 and Ready(_W) then
-    Control.CastSpell(HK_W)
-  end
-  -- W End
-
-  -- Q Start
-  if self.Menu.combo.Q:Value() and IsValid(target)
-    and distanceSqr < self.Menu.auto.maxRange:Value() ^2
-    and Ready(_Q) and lastQ + 170 < GetTickCount() then
-    local Pred = GetGamsteronPrediction(target, self.Q, myHero)
-    if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-      Control.CastSpell(HK_Q, Pred.CastPosition)
-      lastQ = GetTickCount()
-      return
+    -- W Start
+    if self.Menu.combo.W:Value()  and lastW +120 and Ready(_W) then
+      Control.CastSpell(HK_W)
     end
-  end
-  -- Q End
+    -- W End
 
+    -- Q Start
+    if self.Menu.combo.Q:Value() and IsValid(target)
+      and distanceSqr < self.Menu.auto.maxRange:Value() ^2
+      and Ready(_Q) and lastQ + 170 < GetTickCount() then
+      local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+        Control.CastSpell(HK_Q, Pred.CastPosition)
+        lastQ = GetTickCount()
+        return
+      end
+    end
+    -- Q End
+  end
   -- R Start
   for i = 1, #Enemys do
     local hero = Enemys[i]
@@ -138,8 +140,18 @@ function MissFortune:Combo()
       and Ready(_R) then
       if self.Menu.combo.R:Value() and  Orb.Modes[ORBWALKER_MODE_COMBO]
         and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
+        _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
+        inUlt=true
         Control.CastSpell(HK_R, hero)
         lastR = GetTickCount()
+
+        -- MOV AFTER 0.55
+        DelayAction(
+          function()
+            _G.SDK.Orbwalker:SetMovement(true)
+            inUlt=false
+          end, 3000
+        )
         return
       end
     end
