@@ -147,7 +147,7 @@ function Brand:Combo()
     local hero = Enemys[i]
     local numAround = self:GetTargetInRange(650, hero)
     local RDmg = getdmg("R", hero, myHero, 1)
-    if self.Menu.combo.R:Value() and  Orb.Modes[ORBWALKER_MODE_COMBO]
+    if self.Menu.combo.R:Value() and Ready(_R) 
       and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
       Control.CastSpell(HK_R, hero)
       lastR = GetTickCount()
@@ -236,7 +236,7 @@ function Brand:LastHit()
 
       local minion = eMinions[i]
       if IsValid(minion) then
-        if myHero.pos:DistanceTo(minion.pos) < 400 and Ready(_E) then
+        if myHero.pos:DistanceTo(minion.pos) < 400 and Ready(_Q) then
           if self.Menu.auto.Q:Value()
             and Ready(_Q)  then
 
