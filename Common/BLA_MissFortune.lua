@@ -4,7 +4,6 @@ require('PussyDamageLib')
 
 local LocalTableSort        = table.sort
 local LocalStringFind       = string.find
-local inUlt                 = false
 
 class "MissFortune"
 
@@ -79,6 +78,7 @@ function MissFortune:Tick()
     return
   end
 
+  --self:Auto()
 
   if Orb.Modes[ORBWALKER_MODE_COMBO] then
     self:Combo()
@@ -100,13 +100,15 @@ end
 
 function MissFortune:Combo()
   local target = nil
-
   -- E Start
   target = self:GetTarget(690)
   if inUlt == false then
     if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
-      if target and self.Menu.combo.E:Value() then
-        self:CastE(target)
+      local Pred = GetGamsteronPrediction(target, self.E, myHero)
+      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+        if target and self.Menu.combo.E:Value() then
+          Control.CastSpell(HK_E,Pred.CastPosition)
+        end
       end
     end
     -- E End
@@ -118,14 +120,19 @@ function MissFortune:Combo()
     -- W End
 
     -- Q Start
-    if self.Menu.combo.Q:Value() and IsValid(target)
-      and distanceSqr < self.Menu.auto.maxRange:Value() ^2
-      and Ready(_Q) and lastQ + 170 < GetTickCount() then
-      local Pred = GetGamsteronPrediction(target, self.Q, myHero)
-      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-        Control.CastSpell(HK_Q, Pred.CastPosition)
-        lastQ = GetTickCount()
-        return
+    target = self:GetTarget(690)
+    if IsValid(target) then
+      local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
+
+      if self.Menu.combo.Q:Value()
+        and distanceSqr < self.Menu.combo.maxQ:Value() ^2
+        and Ready(_Q) and lastQ + 170 < GetTickCount() then
+        local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+        if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+          Control.CastSpell(HK_Q, Pred.CastPosition)
+          lastQ = GetTickCount()
+          return
+        end
       end
     end
     -- Q End
@@ -145,12 +152,12 @@ function MissFortune:Combo()
         Control.CastSpell(HK_R, hero)
         lastR = GetTickCount()
 
-        -- MOV AFTER 0.55
+        -- MOV AFTER 3 + 0.20
         DelayAction(
           function()
             _G.SDK.Orbwalker:SetMovement(true)
             inUlt=false
-          end, 3000
+          end, 3 + 0.20
         )
         return
       end
@@ -186,7 +193,7 @@ end
 function MissFortune:Clear()
 
   -- Atack enemys minions
-  local eMinions = SDK.ObjectManager:GetEnemyMinions(self.W.range)
+  local eMinions = SDK.ObjectManager:GetEnemyMinions(self.Q.range)
   for i = 1, #eMinions do
     local minion = eMinions[i]
     if IsValid(minion) then
@@ -221,7 +228,7 @@ function MissFortune:LastHit()
       local minion = eMinions[i]
       if IsValid(minion) then
         if myHero.pos:DistanceTo(minion.pos) < 650 and Ready(_Q) then
-          if self.Menu.auto.Q:Value()
+          if self.Menu.lastHit.Q:Value()
             and Ready(_Q)  then
 
             local WDmg = getdmg("Q", minion, myHero, 1)
