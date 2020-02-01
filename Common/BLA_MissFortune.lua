@@ -147,7 +147,7 @@ function MissFortune:Combo()
     if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
       and Ready(_R) then
       if self.Menu.combo.R:Value() and  Orb.Modes[ORBWALKER_MODE_COMBO]
-        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
+        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.8 > hero.health)  then
         _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
         inUlt=true
         Control.CastSpell(HK_R, hero)
@@ -169,19 +169,19 @@ function MissFortune:Combo()
 end
 
 function MissFortune:Harass()
-
+  local targetE = nil
   local  targetE = self:GetTarget(1000)
   if self.Menu.harass.E:Value() and targetE and Ready(_E) and IsValid(targetE) then
-     CastSpell(HK_E,target)
+     Control.CastSpell(HK_E,target)
   end
 
 
-  -- Q Start only 2 targets
+
   local target = self:GetTarget(self.Q.range, true)
-  local bounceTarget = GetQBounceTarget(target)
-  if IsValid(bounceTarget) and LocalStringFind(bounceTarget.type, "Hero") then
+
+  if IsValid(target) then
     if self.Menu.harass.Q:Value() then
-      CastSpell(HK_Q, target)
+      Control.CastSpell(HK_Q, target)
       lastQ = GetTickCount()
       return
     end
@@ -283,8 +283,9 @@ end
 function MissFortune:GetTarget(range, list)
   local targetList = {}
   local inputList = list or Enemys
-  for i = 1, #inputList do
-    local hero = inputList[i]
+  
+  for i = 1, #Enemys do
+    local hero = Enemys[i]
     if GetDistanceSquared(hero.pos, myHero.pos) < range * range and IsValid(hero) then
       targetList[#targetList + 1] = hero
     end
@@ -307,47 +308,4 @@ function MissFortune:GetTargetInRange(range, target)
 end
 
 -- By sikaka
-function GetQBounceTarget(target)
-  if not target then return end
-  local bounceTargetDelay = _G.Alpha.Geometry:InterceptTime(myHero, target, Q.Delay, Q.Speed)
-  local targetOrigin = _G.Alpha.Geometry:PredictUnitPosition(target, bounceTargetDelay)
-  if not _G.Alpha.Geometry:IsInRange(myHero.pos, targetOrigin, Q.Range) then return end
-  local topVector = targetOrigin +(targetOrigin - myHero.pos):Perpendicular():Normalized()* 500
-  local bottomVector = targetOrigin +(targetOrigin - myHero.pos):Perpendicular2():Normalized()* 500
-
-
-  local targets = {}
-  for i = 1, #Enemys do
-    local hero = Enemys[i]
-    if IsValid(hero) and hero.networkID ~= target.networkID then
-      local heroOrigin = _G.Alpha.Geometry:PredictUnitPosition(hero, bounceTargetDelay)
-      if _G.Alpha.Geometry:IsInRange(targetOrigin, heroOrigin, 500 + hero.boundingRadius) and
-        not _G.Alpha.Geometry:IsInRange(topVector, heroOrigin, 450 - hero.boundingRadius) and
-        not _G.Alpha.Geometry:IsInRange(bottomVector, heroOrigin, 450 - hero.boundingRadius) and
-        _G.Alpha.Geometry:GetDistanceSqr(myHero.pos, heroOrigin) > _G.Alpha.Geometry:GetDistanceSqr(myHero.pos, targetOrigin) then
-        targets[#targets + 1] = {t = hero, d = _G.Alpha.Geometry:GetDistance(targetOrigin, heroOrigin)}
-      end
-    end
-  end
-
-  for i = 1, #Enemys do
-    local hero = Enemys[i]
-    if IsValid(hero) and hero.networkID ~= target.networkID then
-      local heroOrigin = _G.Alpha.Geometry:PredictUnitPosition(hero, bounceTargetDelay )
-      if _G.Alpha.Geometry:IsInRange(targetOrigin, heroOrigin, 500 + hero.boundingRadius) and
-        not _G.Alpha.Geometry:IsInRange(topVector, heroOrigin, 450 - hero.boundingRadius) and
-        not _G.Alpha.Geometry:IsInRange(bottomVector, heroOrigin, 450 - hero.boundingRadius) and
-        _G.Alpha.Geometry:GetDistanceSqr(myHero.pos, heroOrigin) > _G.Alpha.Geometry:GetDistanceSqr(myHero.pos, targetOrigin) then
-        targets[#targets + 1] = {t = hero, d = _G.Alpha.Geometry:GetDistance(targetOrigin, heroOrigin)}
-      end
-    end
-  end
-
-  if #targets > 0 then
-    LocalTableSort(targets, function (a,b) return a.d < b.d end)
-    return targets[1].t
-  end
-
-end
-
 MissFortune()
