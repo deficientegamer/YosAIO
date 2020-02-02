@@ -209,10 +209,10 @@ function MissFortune:Harass()
     end
   end
 
-  if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
+  if self.Menu.harass.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
     local Pred = GetGamsteronPrediction(target, self.E, myHero)
     if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-      if target and self.Menu.combo.E:Value() then
+      if target and self.Menu.harass.E:Value() then
         Control.CastSpell(HK_E,Pred.CastPosition)
       end
     end
