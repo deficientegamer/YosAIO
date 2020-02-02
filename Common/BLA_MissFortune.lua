@@ -101,58 +101,64 @@ function MissFortune:Tick()
 end
 
 function MissFortune:Combo()
+  if inUlt == true then return false end
   local target = nil
   -- E Start
+
   target = self:GetTarget(690)
-  if inUlt == false then
-    if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
-      local Pred = GetGamsteronPrediction(target, self.E, myHero)
-      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-        if target and self.Menu.combo.E:Value() then
-          Control.CastSpell(HK_E,Pred.CastPosition)
-        end
+
+
+  if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
+    local Pred = GetGamsteronPrediction(target, self.E, myHero)
+    if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+      if target and self.Menu.combo.E:Value() then
+        Control.CastSpell(HK_E,Pred.CastPosition)
       end
     end
-    -- E End
-
-    -- W Start
-    if self.Menu.combo.W:Value()  and lastW +120 and Ready(_W) then
-      Control.CastSpell(HK_W)
-    end
-    -- W End
-
-    -- Q Start
-    target = self:GetTarget(690)
-    if IsValid(target) then
-      local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
-
-      if self.Menu.combo.Q:Value()
-        and distanceSqr < self.Menu.combo.maxQ:Value() ^2
-        and Ready(_Q) and lastQ + 170 < GetTickCount() then
-        local Pred = GetGamsteronPrediction(target, self.Q, myHero)
-        if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-          Control.CastSpell(HK_Q, Pred.CastPosition)
-          lastQ = GetTickCount()
-          return
-        end
-      end
-    end
-    -- Q End
   end
-  -- R Start
-  for i = 1, #Enemys do
-    local hero = Enemys[i]
-    local numAround = self:GetTargetInRange(940, hero)
-    local RDmg = getdmg("R", hero, myHero, 1)
-    local count = self:GetTargetInRange(420, hero) -- inimigos proximo ao alvo
-    if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
-      and Ready(_R) then
+  -- E End
 
-      if self.Menu.combo.R:Value()
-        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.6 > hero.health)  then
-        _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
+  -- W Start
+  if self.Menu.combo.W:Value()  and lastW +120 and Ready(_W) then
+    Control.CastSpell(HK_W)
+  end
+  -- W End
+
+  -- Q Start
+  target = self:GetTarget(690)
+  if IsValid(target) then
+    local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
+
+    if self.Menu.combo.Q:Value()
+      and distanceSqr < self.Menu.combo.maxQ:Value() ^2
+      and Ready(_Q) and lastQ + 170 < GetTickCount() then
+      local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+        Control.CastSpell(HK_Q, Pred.CastPosition)
+        lastQ = GetTickCount()
+        return
+      end
+    end
+  end
+  -- Q End
+end
+-- R Start
+for i = 1, #Enemys do
+  local hero = Enemys[i]
+  local numAround = self:GetTargetInRange(940, hero)
+  local RDmg = getdmg("R", hero, myHero, 1)
+  local count = self:GetTargetInRange(420, hero) -- inimigos proximo ao alvo
+  if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
+    and Ready(_R) then
+
+    if self.Menu.combo.R:Value()
+      and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.6 > hero.health)  then
+      _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
+
+      local Pred = GetGamsteronPrediction(target, self.R, myHero)
+      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
         inUlt=true
-        Control.CastSpell(HK_R, hero)
+        Control.CastSpell(HK_R, Pred.CastPosition)
         lastR = GetTickCount()
 
         -- MOV AFTER 3 + 0.20
@@ -166,6 +172,7 @@ function MissFortune:Combo()
       end
     end
   end
+
   -- R End
 
 end
@@ -180,7 +187,7 @@ function MissFortune:Harass()
       local minion = eMinions[i]
       if IsValid(minion) then
         -- Check have enemy hero near
-        local hero = self:GetHeroInRange(440, minion)
+        local hero = self:GetHeroInRange(390, minion)
         local Pred = GetGamsteronPrediction(hero, self.Q, myHero)
 
         if IsValid(hero) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
@@ -198,7 +205,7 @@ function MissFortune:Harass()
       if IsValid(hero1) then
 
         -- Check have enemy hero near
-        local hero2 = self:GetHeroInRange(440, hero1)
+        local hero2 = self:GetHeroInRange(390, hero1)
         if hero2 ~= hero1 then
           local Pred = GetGamsteronPrediction(hero2, self.Q, myHero)
           if IsValid(hero2) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
@@ -222,7 +229,7 @@ function MissFortune:Harass()
 end
 
 function MissFortune:Clear()
-
+  if inUlt == true then return false end
   -- Atack enemys minions
   local eMinions = SDK.ObjectManager:GetEnemyMinions(self.Q.range)
   for i = 1, #eMinions do
@@ -233,13 +240,20 @@ function MissFortune:Clear()
         local count = GetMinionCount(200, minion)
         if count >=3 then
           -- use E if user decide
-          if self.Menu.clear.E:Value()
-            and Ready(_E) then
-            Control.CastSpell(HK_E, minion.pos)
+          local Pred = GetGamsteronPrediction(target, self.E, minion)
+          if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+            if self.Menu.clear.E:Value()
+              and Ready(_E) then
+              Control.CastSpell(HK_E, Pred.CastPosition)
+            end
           end
 
-          Control.CastSpell(HK_Q, minion.pos)
-          if self.Menu.clear.Q:Value() then
+          local Pred = GetGamsteronPrediction(target, self.Q, minion)
+          if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+            if self.Menu.clear.Q:Value()
+              and Ready(_Q) then
+              Control.CastSpell(HK_Q, Pred.CastPosition)
+            end
           end
         end
       end
@@ -251,7 +265,7 @@ end
 
 function MissFortune:LastHit()
 
-  if self.Menu.lastHit.Q:Value() then
+  if self.Menu.lastHit.Q:Value()  and Ready(_Q)then
     -- Cast Q
     local eMinions = SDK.ObjectManager:GetEnemyMinions(self.Q.range)
     for i = 1, #eMinions do
