@@ -12,7 +12,7 @@ function MissFortune:__init()
 
   self.Q = {Type = _G.SPELLTYPE_LINE, range = 650,  delay = 0.25,  speed = 1800, Collision = true, MaxCollision = 1, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
   self.E = {Type = _G.SPELLTYPE_CIRCLE, range = 1000, delay = 0.5, speed = 2200, Radius = 400 }
-  self.R = {Type = _G.SPELLTYPE_CONE, range = 1400}
+  self.R = {Type = _G.SPELLTYPE_CONE, range = 1400,Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
 
   self:LoadMenu()
 
