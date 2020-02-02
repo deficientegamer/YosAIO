@@ -170,17 +170,11 @@ function MissFortune:Combo()
 end
 
 function MissFortune:Harass()
-  local targetE = nil
-  local  targetE = self:GetTarget(1000)
-  if self.Menu.harass.E:Value() and targetE and Ready(_E) and IsValid(targetE) then
-     Control.CastSpell(HK_E,target)
-  end
-
 
 
   local target = self:GetTarget(self.Q.range, true)
 
-  if IsValid(target) then
+  if self.Menu.harass.Q:Value() and Ready(_Q) and IsValid(target) then
     if self.Menu.harass.Q:Value() then
       Control.CastSpell(HK_Q, target)
       lastQ = GetTickCount()
@@ -200,7 +194,7 @@ function MissFortune:Clear()
     local minion = eMinions[i]
     if IsValid(minion) then
       if self.Menu.clear.Q:Value()
-        and myHero.pos:DistanceTo(minion.pos) < 580 and Ready(_W) then
+        and myHero.pos:DistanceTo(minion.pos) < 580 and Ready(_Q) then
         local count = GetMinionCount(200, minion)
         if count >=3 then
           -- use E if user decide
@@ -230,8 +224,7 @@ function MissFortune:LastHit()
       local minion = eMinions[i]
       if IsValid(minion) then
         if myHero.pos:DistanceTo(minion.pos) < 650 and Ready(_Q) then
-          if self.Menu.lastHit.Q:Value()
-            and Ready(_Q)  then
+          if self.Menu.lastHit.Q:Value() then
 
             local WDmg = getdmg("Q", minion, myHero, 1)
             if (WDmg > minion.health) then
@@ -240,8 +233,8 @@ function MissFortune:LastHit()
             end
 
             local WDmg = getdmg("E", minion, myHero, 1)
-            if self.Menu.lastHit.E:Value() and (WDmg > minion.health) then
-              Control.CastSpell(HK_Q, minion.pos)
+            if self.Menu.lastHit.E:Value()  and Ready(_E) and (WDmg > minion.health) then
+              Control.CastSpell(HK_E, minion.pos)
               return
             end
 
