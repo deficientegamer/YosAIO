@@ -10,7 +10,7 @@ class "MissFortune"
 
 function MissFortune:__init()
 
-  self.Q = {Type = _G.SPELLTYPE_LINE, range = 650,  delay = 0.25,  speed = 1800, Collision = true, MaxCollision = 1, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
+  self.Q = {Type = _G.SPELLTYPE_CONE, range = 650, radius = 440, delay = 0.25,  speed = 1800, Collision = true, MaxCollision = 1, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
   self.E = {Type = _G.SPELLTYPE_CIRCLE, range = 1000, delay = 0.5, speed = 2200, Radius = 400 }
   self.R = {Type = _G.SPELLTYPE_CONE, range = 1400}
 
@@ -52,8 +52,9 @@ function MissFortune:LoadMenu()
   self.Menu.combo:MenuElement({id = "minComboR", name = "R min enemy's in Combo", value = 2, min = 1, max = 5, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
-  self.Menu.harass:MenuElement({id = "Q", name = "Use Q if two targets", value = true})
-  self.Menu.harass:MenuElement({id = "E", name = "Use E", value = true})
+  self.Menu.harass:MenuElement({id = "Qminion", name = "Q in minion with enemy near", value = true})
+  self.Menu.harass:MenuElement({id = "Qenemy", name = "Q in enemy with enemy near", value = true})
+  self.Menu.harass:MenuElement({id = "E", name = "E in enemy", value = true})
 
   self.Menu:MenuElement({type = MENU, id = "clear", name = "Clear"})
   self.Menu.clear:MenuElement({id = "Q", name = "Q", value = true})
@@ -146,8 +147,8 @@ function MissFortune:Combo()
     local count = self:GetTargetInRange(420, hero) -- inimigos proximo ao alvo
     if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
       and Ready(_R) then
-    
-      if self.Menu.combo.R:Value() 
+
+      if self.Menu.combo.R:Value()
         and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.6 > hero.health)  then
         _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
         inUlt=true
@@ -170,18 +171,52 @@ function MissFortune:Combo()
 end
 
 function MissFortune:Harass()
+  if inUlt == true then return false end
 
+  -- bounce with minion
+  if self.Menu.harass.Qminion:Value() and Ready(_Q) then
+    local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
+    for i = 1, #eMinions do
+      local minion = eMinions[i]
+      if IsValid(minion) then
+        -- Check have enemy hero near
+        local hero = self:GetHeroInRange(440, minion)
+        local Pred = GetGamsteronPrediction(hero, self.Q, myHero)
 
-  local target = self:GetTarget(self.Q.range, true)
+        if IsValid(hero) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
+          Control.CastSpell(HK_Q, minion.pos)
+        end
 
-  if self.Menu.harass.Q:Value() and Ready(_Q) and IsValid(target) then
-    if self.Menu.harass.Q:Value() then
-      Control.CastSpell(HK_Q, target)
-      lastQ = GetTickCount()
-      return
+      end
     end
   end
 
+  -- bounce with enemy
+  if self.Menu.harass.Qenemy:Value() and Ready(_Q) then
+    for i = 1, #Enemys do
+      local hero1 = Enemys[i]
+      if IsValid(hero1) then
+
+        -- Check have enemy hero near
+        local hero2 = self:GetHeroInRange(440, hero1)
+        if hero2 ~= hero1 then
+          local Pred = GetGamsteronPrediction(hero2, self.Q, myHero)
+          if IsValid(hero2) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
+            Control.CastSpell(HK_Q, hero1.pos)
+          end
+        end
+      end
+    end
+  end
+
+  if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
+    local Pred = GetGamsteronPrediction(target, self.E, myHero)
+    if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+      if target and self.Menu.combo.E:Value() then
+        Control.CastSpell(HK_E,Pred.CastPosition)
+      end
+    end
+  end
 
 
 end
@@ -277,7 +312,7 @@ end
 function MissFortune:GetTarget(range, list)
   local targetList = {}
   local inputList = list or Enemys
-  
+
   for i = 1, #Enemys do
     local hero = Enemys[i]
     if GetDistanceSquared(hero.pos, myHero.pos) < range * range and IsValid(hero) then
@@ -299,6 +334,19 @@ function MissFortune:GetTargetInRange(range, target)
     end
   end
   return counter
+end
+
+
+function MissFortune:GetHeroInRange(range, target)
+
+  for i = 1, #Enemys do
+    local hero = Enemys[i]
+    if IsValid(hero) then
+      if GetDistanceSquared(target.pos, hero.pos) < range * range then
+        return hero
+      end
+    end
+  end
 end
 
 
