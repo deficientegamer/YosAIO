@@ -12,7 +12,7 @@ function MissFortune:__init()
 
   self.Q = {Type = _G.SPELLTYPE_LINE, range = 650,  delay = 0.25,  speed = 1800, Collision = true, MaxCollision = 1, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
   self.E = {Type = _G.SPELLTYPE_CIRCLE, range = 1000, delay = 0.5, speed = 2200, Radius = 400 }
-  self.R = {Type = _G.SPELLTYPE_CONE, range = 1400,Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
+  self.R = {Type = _G.SPELLTYPE_CONE, range = 1400}
 
   self:LoadMenu()
 
@@ -146,22 +146,26 @@ function MissFortune:Combo()
     local count = self:GetTargetInRange(420, hero) -- inimigos proximo ao alvo
     if count >=self.Menu.combo.minComboR:Value() and IsValid(hero)
       and Ready(_R) then
-    
-      if self.Menu.combo.R:Value() 
-        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.6 > hero.health)  then
-        _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
-        inUlt=true
-        Control.CastSpell(HK_R, hero)
-        lastR = GetTickCount()
 
-        -- MOV AFTER 3 + 0.20
-        DelayAction(
-          function()
-            _G.SDK.Orbwalker:SetMovement(true)
-            inUlt=false
-          end, 3 + 0.20
-        )
-        return
+      if self.Menu.combo.R:Value()
+        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg/1.6 > hero.health)  then
+
+        local Pred = GetGamsteronPrediction(target, self.R, myHero)
+        if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+          _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
+          inUlt=true
+          Control.CastSpell(HK_R, Pred.CastPosition)
+          lastR = GetTickCount()
+
+          -- MOV AFTER 3 + 0.20
+          DelayAction(
+            function()
+              _G.SDK.Orbwalker:SetMovement(true)
+              inUlt=false
+            end, 3 + 0.20
+          )
+          return
+        end
       end
     end
   end
@@ -171,20 +175,23 @@ end
 
 function MissFortune:Harass()
   local targetE = nil
-  local  targetE = self:GetTarget(1000)
-  if self.Menu.harass.E:Value() and targetE and Ready(_E) and IsValid(targetE) then
-     Control.CastSpell(HK_E,target)
-  end
-
-
-
-  local target = self:GetTarget(self.Q.range, true)
-
-  if IsValid(target) then
-    if self.Menu.harass.Q:Value() then
-      Control.CastSpell(HK_Q, target)
-      lastQ = GetTickCount()
-      return
+  target = self:GetTarget(650)
+  if  IsValid(target) then
+    if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) then
+      local Pred = GetGamsteronPrediction(target, self.E, myHero)
+      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+        if target and self.Menu.combo.E:Value() then
+          Control.CastSpell(HK_E,Pred.CastPosition)
+        end
+      end
+    end
+    local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+    if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+      if self.Menu.harass.Q:Value() then
+        Control.CastSpell(HK_Q, Pred.CastPosition)
+        lastQ = GetTickCount()
+        return
+      end
     end
   end
 
@@ -233,14 +240,14 @@ function MissFortune:LastHit()
           if self.Menu.lastHit.Q:Value()
             and Ready(_Q)  then
 
-            local WDmg = getdmg("Q", minion, myHero, 1)
-            if (WDmg > minion.health) then
+            local Dmg = getdmg("Q", minion, myHero, 1)
+            if (Dmg > minion.health) then
               Control.CastSpell(HK_Q, minion.pos)
               return
             end
 
-            local WDmg = getdmg("E", minion, myHero, 1)
-            if self.Menu.lastHit.E:Value() and (WDmg > minion.health) then
+            local Dmg = getdmg("E", minion, myHero, 1)
+            if self.Menu.lastHit.E:Value() and (Dmg > minion.health) then
               Control.CastSpell(HK_Q, minion.pos)
               return
             end
@@ -284,7 +291,7 @@ end
 function MissFortune:GetTarget(range, list)
   local targetList = {}
   local inputList = list or Enemys
-  
+
   for i = 1, #Enemys do
     local hero = Enemys[i]
     if GetDistanceSquared(hero.pos, myHero.pos) < range * range and IsValid(hero) then
