@@ -104,7 +104,7 @@ function MissFortune:Tick()
 end
 
 function MissFortune:Combo()
-  
+
   if inUlt == true then return false end
   local target = nil
 
@@ -116,10 +116,11 @@ function MissFortune:Combo()
       local distanceSqr = GetDistanceSquared(myHero.pos, hero.pos)
 
       if  distanceSqr < self.R.range ^2 then
+        local maxDistance = self:GetTargetInRange(900, myHero)
         local numAround = self:GetTargetInRange(650, hero)
         local RDmg = getdmg("R", hero, myHero, 1)
 
-        if self.Menu.combo.R:Value()  then
+        if self.Menu.combo.R:Value() and maxDistance > 0 then
           _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
 
           local Pred = GetGamsteronPrediction(hero, self.R, myHero)
