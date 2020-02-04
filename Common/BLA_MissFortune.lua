@@ -252,32 +252,24 @@ end
 function MissFortune:Clear()
   if inUlt == true then return false end
   -- Atack enemys minions
-  local eMinions = SDK.ObjectManager:GetEnemyMinions(self.Q.range)
+
+  local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
   for i = 1, #eMinions do
     local minion = eMinions[i]
-    if IsValid(minion) then
+    
+    if IsValid(minion)
+      and myHero.pos:DistanceTo(minion.pos) < 650 then
+
       if self.Menu.clear.Q:Value()
         and  lastQ +180 < GetTickCount()
-        and myHero.pos:DistanceTo(minion.pos) < 650 and Ready(_Q) then
-        local count = GetMinionCount(280, minion)
-        if count >=2 then
-          -- use E if user decide
-          local Pred = GetGamsteronPrediction(target, self.E, minion)
-          if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-            if self.Menu.clear.E:Value()
-              and Ready(_E) then
-              Control.CastSpell(HK_E, Pred.CastPosition)
-            end
-          end
-
-          local Pred = GetGamsteronPrediction(target, self.Q, minion)
-          if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-            if self.Menu.clear.Q:Value()
-              and Ready(_Q) then
-              Control.CastSpell(HK_Q, Pred.CastPosition)
-            end
-          end
-        end
+        and Ready(_Q) then
+        Control.CastSpell(HK_Q, minion)
+      end
+      
+      local count = GetMinionCount(310, minion)
+      if self.Menu.clear.E:Value()
+        and Ready(_E) and count>1 then
+        Control.CastSpell(HK_E, minion)
       end
 
     end
