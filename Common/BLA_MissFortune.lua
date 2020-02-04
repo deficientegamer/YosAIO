@@ -104,51 +104,52 @@ function MissFortune:Tick()
 end
 
 function MissFortune:Combo()
-  print(inUlt)
+  
   if inUlt == true then return false end
   local target = nil
 
   -- R Start
- 
-  for i = 1, #Enemys do
+  if lastR + 400 < GetTickCount() and Ready(_R) then
+    for i = 1, #Enemys do
 
-    local hero = Enemys[i]
-    local distanceSqr = GetDistanceSquared(myHero.pos, hero.pos)
-    
-    if  distanceSqr < self.R.range ^2 then
-      local numAround = self:GetTargetInRange(650, hero)
-      local RDmg = getdmg("R", hero, myHero, 1)
+      local hero = Enemys[i]
+      local distanceSqr = GetDistanceSquared(myHero.pos, hero.pos)
 
-      if self.Menu.combo.R:Value()  then
-        _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
-        
-        local Pred = GetGamsteronPrediction(hero, self.R, myHero)
-        -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
-        if (numAround >= self.Menu.combo.minComboR:Value())
-          or (self.Menu.combo.RHighDamgeChange:Value()
-                  and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/1.4 > hero.health)
-          or (self.Menu.combo.RImmobileHighDamgeChange:Value()
-                  and Pred.Hitchance >= _G.HITCHANCE_IMMOBILE or RDmg > hero.health) 
-          or (self.Menu.combo.RHighKSChange:Value()
-                  and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/1.6 > hero.health) then
-         
-          inUlt=true
-          Control.CastSpell(HK_R, Pred.CastPosition)
-          lastR = GetTickCount()
+      if  distanceSqr < self.R.range ^2 then
+        local numAround = self:GetTargetInRange(650, hero)
+        local RDmg = getdmg("R", hero, myHero, 1)
 
-          -- MOV AFTER 3 + 0.20
-          DelayAction(
-            function()
-              _G.SDK.Orbwalker:SetMovement(true)
-              inUlt=false
-            end, 3 + 0.20
-          )
-          return
+        if self.Menu.combo.R:Value()  then
+          _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
 
+          local Pred = GetGamsteronPrediction(hero, self.R, myHero)
+          -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
+          if (numAround >= self.Menu.combo.minComboR:Value())
+            or (self.Menu.combo.RHighDamgeChange:Value()
+            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/1.4 > hero.health)
+            or (self.Menu.combo.RImmobileHighDamgeChange:Value()
+            and Pred.Hitchance >= _G.HITCHANCE_IMMOBILE or RDmg > hero.health)
+            or (self.Menu.combo.RHighKSChange:Value()
+            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/1.6 > hero.health) then
+
+            inUlt=true
+            Control.CastSpell(HK_R, Pred.CastPosition)
+            lastR = GetTickCount()
+
+            -- MOV AFTER 3 + 0.20
+            DelayAction(
+              function()
+                _G.SDK.Orbwalker:SetMovement(true)
+                inUlt=false
+              end, 3 + 0.20
+            )
+            return
+
+          end
         end
       end
-    end
 
+    end
   end
 
   -- R End
@@ -158,7 +159,7 @@ function MissFortune:Combo()
   target = self:GetTarget(690)
 
 
-  if self.Menu.combo.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
+  if self.Menu.combo.E:Value()  and lastE +180  < GetTickCount() and Ready(_E) and IsValid(target) then
     local Pred = GetGamsteronPrediction(target, self.E, myHero)
     if Pred.Hitchance >= _G.HITCHANCE_HIGH then
       if target and self.Menu.combo.E:Value() then
@@ -169,7 +170,7 @@ function MissFortune:Combo()
   -- E End
 
   -- W Start
-  if self.Menu.combo.W:Value()  and lastW +120 and Ready(_W) then
+  if self.Menu.combo.W:Value()  and lastW +120  < GetTickCount() and Ready(_W) then
     Control.CastSpell(HK_W)
   end
   -- W End
@@ -200,7 +201,7 @@ function MissFortune:Harass()
   if inUlt == true then return false end
 
   -- bounce with minion
-  if self.Menu.harass.Qminion:Value() and Ready(_Q) then
+  if self.Menu.harass.Qminion:Value() and  lastQ +180 < GetTickCount() and Ready(_Q) then
     local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
     for i = 1, #eMinions do
       local minion = eMinions[i]
@@ -218,7 +219,7 @@ function MissFortune:Harass()
   end
 
   -- bounce with enemy
-  if self.Menu.harass.Qenemy:Value() and Ready(_Q) then
+  if self.Menu.harass.Qenemy:Value() and  lastQ +180 < GetTickCount() and Ready(_Q) then
     for i = 1, #Enemys do
       local hero1 = Enemys[i]
       if IsValid(hero1) then
@@ -235,7 +236,7 @@ function MissFortune:Harass()
     end
   end
 
-  if self.Menu.harass.E:Value()  and lastE +180 and Ready(_E) and IsValid(target) then
+  if self.Menu.harass.E:Value()  and lastE +180  < GetTickCount() and Ready(_E) and IsValid(target) then
     local Pred = GetGamsteronPrediction(target, self.E, myHero)
     if Pred.Hitchance >= _G.HITCHANCE_HIGH then
       if target and self.Menu.harass.E:Value() then
@@ -255,9 +256,10 @@ function MissFortune:Clear()
     local minion = eMinions[i]
     if IsValid(minion) then
       if self.Menu.clear.Q:Value()
-        and myHero.pos:DistanceTo(minion.pos) < 580 and Ready(_Q) then
-        local count = GetMinionCount(200, minion)
-        if count >=3 then
+        and  lastQ +180 < GetTickCount()
+        and myHero.pos:DistanceTo(minion.pos) < 650 and Ready(_Q) then
+        local count = GetMinionCount(280, minion)
+        if count >=2 then
           -- use E if user decide
           local Pred = GetGamsteronPrediction(target, self.E, minion)
           if Pred.Hitchance >= _G.HITCHANCE_HIGH then
