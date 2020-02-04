@@ -12,7 +12,7 @@ if not FileExist(COMMON_PATH .. "GamsteronPrediction.lua") then
 end
 
 -- globals
-local version = 0.02.1
+local version = 0.021
 local hero = myHero.charName
 if hero == "Brand" or hero == "MissFortune" then
   print("Load BotLane AIO By AcessibilitySoldier")
