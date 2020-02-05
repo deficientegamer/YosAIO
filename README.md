@@ -28,7 +28,7 @@ Possible LastHit
 Auto (insecure)
 - Q
 - Ignite
-
+--------------------------------------------------------------------------------------
 + MissFortune
 Combo's
 - E
@@ -50,7 +50,7 @@ Possible Clear's (only 3+ minions)
 Possible LastHit (Only kill minion)
 - E
 - Q
-
+--------------------------------------------------------------------------------------
 + Poppy
 Combo
 - E
