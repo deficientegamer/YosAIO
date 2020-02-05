@@ -169,7 +169,7 @@ function Poppy:Combo()
   -- Q End
 
   -- R Start
-  if lastR + 1400 < GetTickCount() and Ready(_R) then
+  if lastR + self.Menu.combo.comboUltConfig.maxDistance:Value() < GetTickCount() and Ready(_R) then
     for i = 1, #Enemys do
 
       local hero = Enemys[i]
@@ -186,22 +186,29 @@ function Poppy:Combo()
           lastW = GetTickCount()
         end
       end
-      -- ks
-      if  distanceSqr < self.R.range ^2 then
-        local maxDistance = self:GetTargetInRange(self.Menu.combo.comboUltConfig.maxDistance:Value(), myHero)
-        local numAround = self:GetTargetInRange(self.Menu.combo.comboUltConfig.enemysDistance:Value(), hero)
+
+      -- ks near
+      local maxDistance = self:GetTargetInRange(self.Menu.combo.comboUltConfig.maxDistance:Value(), myHero)
+      print("0")
+      if  distanceSqr < (maxDistance ^2) then
+        print("1")
         local RDmg = getdmg("R", hero, myHero, 1)
-
         if self.Menu.combo.R:Value() and IsValid(hero) then
-
+          print("2")
           local Pred = GetGamsteronPrediction(hero, self.R, myHero)
           -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
           if self.Menu.combo.RHighKSChange:Value()
             and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/(self.Menu.combo.comboUltConfig.highDamageDivisor:Value()/10) > hero.health then
+            print("3")
+            Control.KeyDown(HK_R)
+            DelayAction(
+              function()
+                Control.KeyUp(HK_R)
+                Control.CastSpell(HK_R, Pred.CastPosition)
+                lastR = GetTickCount()
+              end, 4
+            )
 
-
-            Control.CastSpell(HK_R, Pred.CastPosition)
-            lastR = GetTickCount()
             return
           end
         end
