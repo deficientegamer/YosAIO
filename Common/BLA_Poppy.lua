@@ -54,15 +54,15 @@ function Poppy:LoadMenu()
   self.Menu.combo:MenuElement({id = "E", name = "E", value = true})
   self.Menu.combo:MenuElement({id = "maxE", name = "E max distance in Combo", value = 700, min = 0, max = 775, step = 1})
 
-  self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
-  self.Menu.combo:MenuElement({id = "RVeryNear", name = "RW - whenever very near and < health", value = true})
-  self.Menu.combo:MenuElement({id = "RHighKSChange", name = "R - whenever very high KS chance", value = true})
+  self.Menu.combo:MenuElement({id = "R", name = "R (Only Near)", value = true})
+  self.Menu.combo:MenuElement({id = "RVeryNear", name = "RW - whenever very and < health", value = true})
+  self.Menu.combo:MenuElement({id = "RHighKSChange", name = "R - whenever very and high KS chance", value = true})
 
   self.Menu.combo:MenuElement({type = MENU, id = "comboUltConfig", name = "Custom Ult"})
   self.Menu.combo.comboUltConfig:MenuElement({id = "veryNear", name = "Very Near Consider", value = 50, min = 0, max = 120, step = 1})
   self.Menu.combo.comboUltConfig:MenuElement({id = "highDamageDivisor", name = "Very High KS Divisor Consider", value = 10, min = 5, max = 30, step = 1})
   self.Menu.combo.comboUltConfig:MenuElement({id = "enemysDistance", name = "Enemy's Distance Consider", value = 90, min = 0, max = 200, step = 1})
-  self.Menu.combo.comboUltConfig:MenuElement({id = "maxDistance", name = "Max Distance", value = 1200, min = 0, max = 1900, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "maxDistance", name = "Max Distance", value = 220, min = 0, max = 310, step = 1})
 
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
@@ -186,7 +186,7 @@ function Poppy:Combo()
           lastW = GetTickCount()
         end
       end
-
+      -- ks
       if  distanceSqr < self.R.range ^2 then
         local maxDistance = self:GetTargetInRange(self.Menu.combo.comboUltConfig.maxDistance:Value(), myHero)
         local numAround = self:GetTargetInRange(self.Menu.combo.comboUltConfig.enemysDistance:Value(), hero)
