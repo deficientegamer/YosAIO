@@ -2,7 +2,8 @@
 This repo is an GOS-EXT AIO for BotLane Champs. This AIO use modernized's lib's.
 
 Details
-+ Brand
+--------------------------------------------------------------------------------------
+Brand
 
 Combo's
 
@@ -29,7 +30,8 @@ Auto (insecure)
 - Q
 - Ignite
 --------------------------------------------------------------------------------------
-+ MissFortune
+MissFortune
+
 Combo's
 - E
 - W
@@ -51,7 +53,8 @@ Possible LastHit (Only kill minion)
 - E
 - Q
 --------------------------------------------------------------------------------------
-+ Poppy
+Poppy
+
 Combo
 - E
 - Q
