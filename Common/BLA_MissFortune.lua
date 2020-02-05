@@ -187,11 +187,10 @@ function MissFortune:Combo()
   target = self:GetTarget(690)
 
 
-  if IsValid(target) then
+  if IsValid(target) and Ready(_Q) and lastQ + 170 < GetTickCount() then
     local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
     if self.Menu.combo.Q:Value()
-      and distanceSqr < self.Menu.combo.maxQ:Value() ^2
-      and Ready(_Q) and lastQ + 170 < GetTickCount() then
+      and distanceSqr < self.Menu.combo.maxQ:Value() ^2    then
       local Pred = GetGamsteronPrediction(target, self.Q, myHero)
       if Pred.Hitchance >= _G.HITCHANCE_HIGH then
         Control.CastSpell(HK_Q, Pred.CastPosition)
