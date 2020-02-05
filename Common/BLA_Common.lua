@@ -36,19 +36,6 @@
  Allys  =   {}
 
 
-function EnableOrb(bool)
-  if _G.EOWLoaded then
-    EOW:SetMovements(bool)
-    EOW:SetAttacks(bool)
-  elseif _G.SDK and _G.SDK.Orbwalker then
-    _G.SDK.Orbwalker:SetMovement(bool)
-    _G.SDK.Orbwalker:SetAttack(bool)
-  else
-    GOS.BlockMovement = not bool
-    GOS.BlockAttack = not bool
-  end
-end
-
 function GetDistanceSquared(vec1, vec2)
    dx = vec1.x - vec2.x
    dy = (vec1.z or vec1.y) - (vec2.z or vec2.y)
@@ -71,6 +58,21 @@ function Ready(spell)
     and myHero:GetSpellData(spell).level > 0
     and myHero:GetSpellData(spell).mana <= myHero.mana
     and Game.CanUseSpell(spell) == 0
+end
+
+
+function IsSendUnderTurretAlly(myHero,unit)
+
+  for i = 1, Game.TurretCount() do
+    local turret = Game.Turret(i)
+
+    if turret.isAlly and not turret.dead then
+      if turret.pos:DistanceTo(unit.pos) < 1200 then
+        return true
+      end
+    end
+  end
+  return false
 end
 
 function OnAllyHeroLoad(cb)

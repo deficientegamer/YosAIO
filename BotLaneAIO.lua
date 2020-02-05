@@ -12,9 +12,9 @@ if not FileExist(COMMON_PATH .. "GamsteronPrediction.lua") then
 end
 
 -- globals
-local version = 0.021
+local version = 0.03
 local hero = myHero.charName
-if hero == "Brand" or hero == "MissFortune" then
+if hero == "Brand" or hero == "MissFortune" or hero == "Poppy" then
   print("Load BotLane AIO By AcessibilitySoldier")
   require("BLA_".. hero)
 else 
