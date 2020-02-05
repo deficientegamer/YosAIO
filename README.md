@@ -77,4 +77,4 @@ Escape
 -W
 
 Auto (insecure)
--W
+- W
