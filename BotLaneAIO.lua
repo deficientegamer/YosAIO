@@ -15,8 +15,18 @@ end
 local version = 0.03
 local hero = myHero.charName
 if hero == "Brand" or hero == "MissFortune" or hero == "Poppy" then
-  print("Load BotLane AIO By AcessibilitySoldier")
-  require("BLA_".. hero)
-else 
+  print("BotLane AIO waiting GSOOrb for 2 second's...")
+  Callback.Add("Load", function()
+    DelayAction(function()
+      if not AIO then
+        AIO = true
+        require("BLA_".. hero)
+       print("Load BotLane AIO By AcessibilitySoldier")
+      end
+    end, 2)
+  end)
+
+
+else
   print("Champ not supported by BotLane AIO")
 end
