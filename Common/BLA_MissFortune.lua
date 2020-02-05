@@ -49,10 +49,17 @@ function MissFortune:LoadMenu()
   self.Menu.combo:MenuElement({id = "W", name = "W", value = true})
   self.Menu.combo:MenuElement({id = "E", name = "E", value = true})
   self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
-  self.Menu.combo:MenuElement({id = "minComboR", name = "R - whenever X(+) enemy's", value = 3, min = 1, max = 5, step = 1})
-  self.Menu.combo:MenuElement({id = "RHighDamgeChange", name = "R - whenever high dmg", value = true})
+  self.Menu.combo:MenuElement({id = "minComboR", name = "R - whenever X(+) enemy's", value = 2, min = 1, max = 5, step = 1})
+  self.Menu.combo:MenuElement({id = "RHighDamgeChange", name = "R - whenever high dmg", value = false})
   self.Menu.combo:MenuElement({id = "RImmobileHighDamgeChange", name = "R - whenever immobile high dmg", value = true})
   self.Menu.combo:MenuElement({id = "RHighKSChange", name = "R - whenever very high KS chance", value = true})
+  self.Menu.combo:MenuElement({type = MENU, id = "comboUltConfig", name = "Custom Ult"})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "highDamageDivisor", name = "High Damage Divisor Consider", value = 15, min = 5, max = 30, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "highDamageDivisor", name = "Very High Damage Divisor Consider", value = 20, min = 5, max = 30, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "enemysDistance", name = "Enemy's Distance Consider", value = 480, min = 100, max = 1400, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "maxDistance", name = "Max Distance", value = 900, min = 100, max = 1400, step = 1})
+  
+  
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
   self.Menu.harass:MenuElement({id = "Qminion", name = "Q in minion with enemy near", value = true})
@@ -116,8 +123,8 @@ function MissFortune:Combo()
       local distanceSqr = GetDistanceSquared(myHero.pos, hero.pos)
 
       if  distanceSqr < self.R.range ^2 then
-        local maxDistance = self:GetTargetInRange(900, myHero)
-        local numAround = self:GetTargetInRange(650, hero)
+        local maxDistance = self:GetTargetInRange(self.Menu.combo.comboUltConfig.maxDistance:Value(), myHero)
+        local numAround = self:GetTargetInRange(self.Menu.combo.comboUltConfig.enemysDistance:Value(), hero)
         local RDmg = getdmg("R", hero, myHero, 1)
 
         if self.Menu.combo.R:Value() and maxDistance > 0 then
@@ -127,11 +134,11 @@ function MissFortune:Combo()
           -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
           if (numAround >= self.Menu.combo.minComboR:Value())
             or (self.Menu.combo.RHighDamgeChange:Value()
-            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/1.4 > hero.health)
+            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/(self.Menu.combo.comboUltConfig.highDamageDivisor:Value()/10) > hero.health)
             or (self.Menu.combo.RImmobileHighDamgeChange:Value()
             and Pred.Hitchance >= _G.HITCHANCE_IMMOBILE or RDmg > hero.health)
             or (self.Menu.combo.RHighKSChange:Value()
-            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/1.6 > hero.health) then
+            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/(self.Menu.combo.comboUltConfig.highDamageDivisor:Value()/10) > hero.health) then
 
             inUlt=true
             Control.CastSpell(HK_R, Pred.CastPosition)
@@ -256,7 +263,7 @@ function MissFortune:Clear()
   local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
   for i = 1, #eMinions do
     local minion = eMinions[i]
-    
+
     if IsValid(minion)
       and myHero.pos:DistanceTo(minion.pos) < 650 then
 
@@ -265,7 +272,7 @@ function MissFortune:Clear()
         and Ready(_Q) then
         Control.CastSpell(HK_Q, minion)
       end
-      
+
       local count = GetMinionCount(310, minion)
       if self.Menu.clear.E:Value()
         and Ready(_E) and count>1 then
