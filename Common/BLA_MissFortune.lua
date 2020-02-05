@@ -41,7 +41,7 @@ end
 
 function MissFortune:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAMissFortune", name = "BotLaneAIO MissFortune RC 0.2"})
+  self.Menu = MenuElement({type = MENU, id = "BLAMissFortune", name = "BotLaneAIO MissFortune RC 0.3"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
@@ -58,8 +58,8 @@ function MissFortune:LoadMenu()
   self.Menu.combo.comboUltConfig:MenuElement({id = "highDamageDivisor", name = "Very High Damage Divisor Consider", value = 20, min = 5, max = 30, step = 1})
   self.Menu.combo.comboUltConfig:MenuElement({id = "enemysDistance", name = "Enemy's Distance Consider", value = 480, min = 100, max = 1400, step = 1})
   self.Menu.combo.comboUltConfig:MenuElement({id = "maxDistance", name = "Max Distance", value = 900, min = 100, max = 1400, step = 1})
-  
-  
+
+
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
   self.Menu.harass:MenuElement({id = "Qminion", name = "Q in minion with enemy near", value = true})
@@ -227,7 +227,7 @@ function MissFortune:Harass()
   end
 
   -- bounce with enemy
-  if self.Menu.harass.Qenemy:Value() and  lastQ +180 < GetTickCount() and Ready(_Q) then
+  if self.Menu.harass.Qenemy:Value() and  lastQ +180 < GetTickCount() and Ready(_Q)  then
     for i = 1, #Enemys do
       local hero1 = Enemys[i]
       if IsValid(hero1) then
@@ -244,11 +244,14 @@ function MissFortune:Harass()
     end
   end
 
-  if self.Menu.harass.E:Value()  and lastE +180  < GetTickCount() and Ready(_E) and IsValid(target) then
-    local Pred = GetGamsteronPrediction(target, self.E, myHero)
-    if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-      if target and self.Menu.harass.E:Value() then
-        Control.CastSpell(HK_E,Pred.CastPosition)
+  if self.Menu.harass.E:Value()  and lastE +180  < GetTickCount() and Ready(_E)  then
+    for i = 1, #Enemys do
+      local hero = Enemys[i]
+      local Pred = GetGamsteronPrediction(hero, self.E, myHero)
+      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+        if target and self.Menu.harass.E:Value() and IsValid(hero) then
+          Control.CastSpell(HK_E,Pred.CastPosition)
+        end
       end
     end
   end
