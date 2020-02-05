@@ -6,46 +6,50 @@ Details
 
 Combo's
 
-RWEQ + exhaust or ignition
-EQW + exhaust or ignition
-QEW + Escape or e Ignite
-REQ + escape or and ignite
+- RWEQ + exhaust or ignition
+- EQW + exhaust or ignition
+- QEW + Escape or e Ignite
+- REQ + escape or and ignite
 
 Harass
-W
+- W
 
 Escape / escape mode
-Exhaust
-EQ
+- Exhaust
+- EQ
 
 Possible Clear's
-WE
-W
+- WE
+- W
 
 Possible LastHit
-Q
+- Q
+
+Auto (insecure)
+- Q
+- Ignite
 
 + MissFortune
 Combo's
-E
-W
-Q
-R
+- E
+- W
+- Q
+- R
 
 Harass
-E
-Q
+- E
+- Q
 
 Escape / escape mode
-W
+- W
 
 Possible Clear's (only 3+ minions)
-E
-Q
+- E
+- Q
 
 Possible LastHit (Only kill minion)
-E
-Q
+- E
+- Q
 
 + Poppy
 Combo
@@ -67,5 +71,7 @@ Clear
 - Q
 
 Escape
+-W
 
+Auto (insecure)
 -W

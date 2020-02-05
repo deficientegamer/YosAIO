@@ -77,7 +77,7 @@ function Poppy:LoadMenu()
   self.Menu.lastHit:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.lastHit:MenuElement({id = "E", name = "E", value = true})
 
-  self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto"})
+  self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto (insecure)"})
   self.Menu.auto:MenuElement({id = "W", name = "W", value = true})
 
   self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape"})

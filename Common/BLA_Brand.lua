@@ -54,15 +54,16 @@ function Brand:LoadMenu()
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
   self.Menu.harass:MenuElement({id = "W", name = "use W", value = true})
 
-  self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto"})
-  self.Menu.auto:MenuElement({id = "R", name = "R", value = true})
+  self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto (Insecure)"})
+  self.Menu.auto:MenuElement({id = "use", name = "Use", value = false})
+  self.Menu.auto:MenuElement({id = "R", name = "R", value = false})
   self.Menu.auto:MenuElement({id = "minAutoR", name = "Min R target", value = 4, min = 1, max = 5, step = 1})
-  self.Menu.auto:MenuElement({id = "Q", name = "auto Q to stun", value = true})
+  self.Menu.auto:MenuElement({id = "Q", name = "auto Q to stun", value = false})
   self.Menu.auto:MenuElement({id = "maxRange", name = "Max Q Range", value = 875, min = 0, max = 875, step = 1})
-  self.Menu.auto:MenuElement({id = "W", name = "auto W if Immobile", value = true})
-  self.Menu.auto:MenuElement({id = "E", name = "auto E if Buff count 2", value = true})
+  self.Menu.auto:MenuElement({id = "W", name = "auto W if Immobile", value = false})
+  self.Menu.auto:MenuElement({id = "E", name = "auto E if Buff count 2", value = false})
   self.Menu.auto:MenuElement({type = MENU, id = "AntiDash", name = "E Anti Dash Target"})
-  OnEnemyHeroLoad(function(hero) self.Menu.auto.AntiDash:MenuElement({id = hero.charName, name = hero.charName, value = true}) end)
+  OnEnemyHeroLoad(function(hero) self.Menu.auto.AntiDash:MenuElement({id = hero.charName, name = hero.charName, value = false}) end)
 
   self.Menu:MenuElement({type = MENU, id = "clear", name = "Clear"})
   self.Menu.clear:MenuElement({id = "W", name = "W on 3 minions +", value = true})
@@ -89,7 +90,9 @@ function Brand:Tick()
     return
   end
 
+ if self.Menu.auto.use:Value() then
   self:Auto()
+ end
 
   if Orb.Modes[ORBWALKER_MODE_COMBO] then
     self:Combo()
