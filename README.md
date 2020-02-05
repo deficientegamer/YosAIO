@@ -2,10 +2,11 @@
 This repo is an GOS-EXT AIO for BotLane Champs. 
 
 # The Project
-AIO created by Accessibility Soldier so that it is possible for disabled people to play LOL as equals.
+AIO created by Accessibility Soldier so that it is possible for disabled people to play games as equals.
 This AIO will exist and will be evolved until the day when the company developing the game creates the necessary features for disabled people to play as equals.
 
-Hugs to all my brothers from all over the world who have special needs.
+# Message
+Hugs to all my brothers from all over the world who have special needs. You are not alone!
 
 # Details
 --------------------------------------------------------------------------------------
