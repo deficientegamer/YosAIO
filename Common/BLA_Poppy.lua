@@ -43,26 +43,28 @@ end
 
 function Poppy:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAPoppy", name = "BotLaneAIO Poppy RC 0.1"})
+  self.Menu = MenuElement({type = MENU, id = "BLAPoppy", name = "BotLaneAIO Poppy RC 0.2"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
-  self.Menu.combo:MenuElement({id = "maxQ", name = "E max distance in Combo", value = 270, min = 0, max = 430, step = 1})
+  self.Menu.combo:MenuElement({id = "maxQ", name = "q max distance in Combo", value = 140, min = 0, max = 340, step = 1})
 
   self.Menu.combo:MenuElement({id = "W", name = "W", value = false})
 
   self.Menu.combo:MenuElement({id = "E", name = "E", value = true})
-  self.Menu.combo:MenuElement({id = "maxE", name = "E max distance in Combo", value = 700, min = 0, max = 775, step = 1})
+  self.Menu.combo:MenuElement({id = "maxE", name = "E max distance in Combo", value = 735, min = 0, max = 775, step = 1})
 
-  self.Menu.combo:MenuElement({id = "R", name = "R (Only Near)", value = true})
+
+  self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
   self.Menu.combo:MenuElement({id = "RVeryNear", name = "RW - whenever very and < health", value = true})
-  self.Menu.combo:MenuElement({id = "RHighKSChange", name = "R - whenever very and high KS chance", value = true})
+  self.Menu.combo:MenuElement({id = "RManyEnemies", name = "R - whenever many enemies", value = true})
+  self.Menu.combo:MenuElement({id = "RAfterE", name = "R - whenever after E in wall", value = true})
 
   self.Menu.combo:MenuElement({type = MENU, id = "comboUltConfig", name = "Custom Ult"})
   self.Menu.combo.comboUltConfig:MenuElement({id = "veryNear", name = "Very Near Consider", value = 50, min = 0, max = 120, step = 1})
-  self.Menu.combo.comboUltConfig:MenuElement({id = "highDamageDivisor", name = "Very High KS Divisor Consider", value = 10, min = 5, max = 30, step = 1})
-  self.Menu.combo.comboUltConfig:MenuElement({id = "enemysDistance", name = "Enemy's Distance Consider", value = 90, min = 0, max = 200, step = 1})
-  self.Menu.combo.comboUltConfig:MenuElement({id = "maxDistance", name = "Max Distance", value = 220, min = 0, max = 310, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "manyEnemies", name = "Many Enemies For Clear", value = 3, min = 1, max = 5, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "distancieCountEnemies", name = "Distance Enemies For Count", value = 440, min = 50, max = 1000, step = 1})
+  self.Menu.combo.comboUltConfig:MenuElement({id = "maxDistance", name = "Max Distance", value = 220, min = 0, max = 1000, step = 1})
 
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
@@ -124,20 +126,32 @@ function Poppy:Combo()
 
 
   -- E Start
-  target = self:GetTarget(775)
+  target = self:GetTarget(self.Menu.combo.maxE:Value())
+
   if self.Menu.combo.E:Value()  and lastE +140  < GetTickCount() and Ready(_E) and IsValid(target) then
 
     local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
     local Pred = GetGamsteronPrediction(target, self.E, myHero)
-    if Pred.Hitchance >= _G.HITCHANCE_HIGH and distanceSqr < self.Menu.combo.maxE:Value() ^2 then
-
+    if Pred.Hitchance >= _G.HITCHANCE_NORMAL  then
+    
 
       local finalPos = target.pos:Extended(myHero.pos, -425)
 
       -- Logica para mandar para parede
       if MapPosition:inWall(finalPos) then
+
         Control.CastSpell(HK_E,Pred.CastPosition)
         lastE = GetTickCount()
+
+        local targetNear = self:GetTarget(self.Menu.combo.comboUltConfig.veryNear:Value())
+        if tagertNear == target and IsValid(targetNear)  then
+          local Pred = GetGamsteronPrediction(targetNear, self.R, myHero)
+          if  Pred.Hitchance >= _G.HITCHANCE_HIGH and Ready(_R)  then
+            Control.CastSpell(HK_R, Pred.CastPosition)
+            lastR = GetTickCount()
+           
+          end
+        end
       end
 
       -- logica pra mandar pra torre
@@ -153,13 +167,11 @@ function Poppy:Combo()
 
 
   -- Q Start
-  target = self:GetTarget(430)
+  target = self:GetTarget(self.Menu.combo.maxQ:Value())
   if IsValid(target) and Ready(_Q) and lastQ + 120 < GetTickCount() then
-    local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
-    if self.Menu.combo.Q:Value()
-      and distanceSqr < self.Menu.combo.maxQ:Value() ^2    then
+    if self.Menu.combo.Q:Value()  then
       local Pred = GetGamsteronPrediction(target, self.Q, myHero)
-      if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+      if Pred.Hitchance >= _G.HITCHANCE_NORMAL then
         Control.CastSpell(HK_Q, Pred.CastPosition)
         lastQ = GetTickCount()
         return
@@ -169,17 +181,17 @@ function Poppy:Combo()
   -- Q End
 
   -- R Start
-  if lastR + self.Menu.combo.comboUltConfig.maxDistance:Value() < GetTickCount() and Ready(_R) then
+  target = self:GetTarget(self.Menu.combo.comboUltConfig.maxDistance:Value())
+
+  if IsValid(target) and Ready(_R)  and self.Menu.combo.R:Value()  then
+
     for i = 1, #Enemys do
-
-      local hero = Enemys[i]
-      local distanceSqr = GetDistanceSquared(myHero.pos, hero.pos)
-
       -- very near
-      if  distanceSqr < self.Menu.combo.comboUltConfig.veryNear:Value() ^2
-        and IsValid(hero) and myHero.health+200 < hero.health then
-        local Pred = GetGamsteronPrediction(hero, self.R, myHero)
-        if  Pred.Hitchance >= _G.HITCHANCE_HIGH and Ready(_W)  then
+      local targetNear = self:GetTarget(self.Menu.combo.comboUltConfig.veryNear:Value())
+      if  IsValid(targetNear)  then
+        local Pred = GetGamsteronPrediction(targetNear, self.R, myHero)
+        if  Pred.Hitchance >= _G.HITCHANCE_HIGH and Ready(_R)  then
+
           Control.CastSpell(HK_R, Pred.CastPosition)
           lastR = GetTickCount()
           Control.CastSpell(HK_W)
@@ -187,31 +199,30 @@ function Poppy:Combo()
         end
       end
 
-      -- ks near
-      local maxDistance = self:GetTargetInRange(self.Menu.combo.comboUltConfig.maxDistance:Value(), myHero)
-      print("0")
-      if  distanceSqr < (maxDistance ^2) then
-        print("1")
-        local RDmg = getdmg("R", hero, myHero, 1)
-        if self.Menu.combo.R:Value() and IsValid(hero) then
-          print("2")
-          local Pred = GetGamsteronPrediction(hero, self.R, myHero)
-          -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
-          if self.Menu.combo.RHighKSChange:Value()
-            and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/(self.Menu.combo.comboUltConfig.highDamageDivisor:Value()/10) > hero.health then
-            print("3")
-            Control.KeyDown(HK_R)
-            DelayAction(
-              function()
-                Control.KeyUp(HK_R)
-                Control.CastSpell(HK_R, Pred.CastPosition)
-                lastR = GetTickCount()
-              end, 4
-            )
+      -- jogar para longe muitos inimigos
 
-            return
-          end
-        end
+      local numAround = self:GetTargetInRange(self.Menu.combo.comboUltConfig.distancieCountEnemies:Value(), target)
+      local RDmg = getdmg("R", target, myHero, 1)
+
+      local Pred = GetGamsteronPrediction(target, self.R, myHero)
+      -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
+      if self.Menu.combo.RManyEnemies:Value()
+        and Pred.Hitchance >= _G.HITCHANCE_HIGH
+        and numAround >= self.Menu.combo.comboUltConfig.manyEnemies:Value()
+        and lastR + 90 < GetTickCount()  then
+        Control.KeyDown(HK_R)
+        DelayAction(
+          function()
+            Control.KeyUp(HK_R)
+            local Pred = GetGamsteronPrediction(target, self.R, myHero)
+            if Pred.Hitchance >= _G.HITCHANCE_HIGH then
+              Control.CastSpell(HK_R, Pred.CastPosition)
+            end
+            lastR = GetTickCount()
+          end, 3
+        )
+
+        return
       end
 
     end

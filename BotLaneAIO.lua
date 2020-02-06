@@ -12,16 +12,16 @@ if not FileExist(COMMON_PATH .. "GamsteronPrediction.lua") then
 end
 
 -- globals
-local version = 0.03
+local version = 0.04
 local hero = myHero.charName
 if hero == "Brand" or hero == "MissFortune" or hero == "Poppy" then
-  print("BotLane AIO waiting GSOOrb for 2 second's...")
+  print("BotLane AIO 0.04 waiting GSOOrb for 2 second's...")
   Callback.Add("Load", function()
     DelayAction(function()
       if not AIO then
         AIO = true
         require("BLA_".. hero)
-       print("Load BotLane AIO By AcessibilitySoldier")
+       print("Load BotLane AIO 0.04 By AcessibilitySoldier")
       end
     end, 2)
   end)
