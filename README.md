@@ -1,5 +1,5 @@
-# BotLaneAIO
-This repo is an GOS-EXT AIO for BotLane Champs. 
+# SoldierAIO
+To EXT. 
 
 # The Project
 AIO created by Accessibility Soldier so that it is possible for disabled people to play games as equals.
