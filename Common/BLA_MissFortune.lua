@@ -41,7 +41,7 @@ end
 
 function MissFortune:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAMissFortune", name = "BotLaneAIO MissFortune RC 0.3"})
+  self.Menu = MenuElement({type = MENU, id = "BLAMissFortune", name = "SoldierAIO MissFortune RC 0.3"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})

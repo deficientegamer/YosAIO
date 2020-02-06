@@ -43,7 +43,7 @@ end
 
 function Poppy:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAPoppy", name = "BotLaneAIO Poppy RC 0.2"})
+  self.Menu = MenuElement({type = MENU, id = "BLAPoppy", name = "SoldierAIO Poppy RC 0.2"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
@@ -52,6 +52,7 @@ function Poppy:LoadMenu()
   self.Menu.combo:MenuElement({id = "W", name = "W", value = false})
 
   self.Menu.combo:MenuElement({id = "E", name = "E", value = true})
+  self.Menu.combo:MenuElement({id = "EProtect", name = "E to protect ally", value = true})
   self.Menu.combo:MenuElement({id = "maxE", name = "E max distance in Combo", value = 735, min = 0, max = 775, step = 1})
 
 
@@ -82,8 +83,9 @@ function Poppy:LoadMenu()
   self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto (insecure)"})
   self.Menu.auto:MenuElement({id = "W", name = "W", value = true})
 
-  self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape"})
-  self.Menu.escape:MenuElement({id = "W", name = "W", value = true})
+  self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape (use Orb Key)"})
+  self.Menu.escape:MenuElement({id = "W", name = "W if my health <", value = true})
+  self.Menu.escape:MenuElement({id = "E", name = "E if my health > and ally low", value = true})
 
   self.Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
   self.Menu.Drawing:MenuElement({id = "Q", name = "Draw [Q] Range", value = true})
@@ -110,12 +112,29 @@ function Poppy:Tick()
   elseif Orb.Modes[ORBWALKER_MODE_LASTHIT] then
     self:LastHit()
   elseif Orb.Modes[ORBWALKER_MODE_FLEE] then
+
     -- W Start
-    if self.Menu.combo.W:Value()  and lastW +240 and Ready(_W) then
+    target = self:GetTarget(800)
+    if self.Menu.escape.W:Value()  and lastW +240 and Ready(_W)
+      and IsValid(target) and target.health > myHero.health then
       Control.CastSpell(HK_W)
       lastW = GetTickCount()
     end
     -- W End
+
+    -- E Start
+    -- afastar inimigo de aliado morrendo
+    target = self:GetTarget(740)
+    numLwHealthAlly = HeroesAroundLowHealthCompMe(380,myHero.pos,TEAM_ENEMY)
+    print(numLwHealthAlly)
+    if self.Menu.escape.E:Value()  and lastE +140 and Ready(_E)
+      and IsValid(target)
+      and (target.health*1.30) < myHero.health
+      and numLwHealthAlly>0 then
+      Control.CastSpell(HK_E)
+      lastE = GetTickCount()
+    end
+
   end
 
 end
@@ -127,37 +146,73 @@ function Poppy:Combo()
 
   -- E Start
   target = self:GetTarget(self.Menu.combo.maxE:Value())
-
+  
   if self.Menu.combo.E:Value()  and lastE +140  < GetTickCount() and Ready(_E) and IsValid(target) then
 
     local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
     local Pred = GetGamsteronPrediction(target, self.E, myHero)
     if Pred.Hitchance >= _G.HITCHANCE_NORMAL  then
-    
+
 
       local finalPos = target.pos:Extended(myHero.pos, -425)
 
-      -- Logica para mandar para parede
-      if MapPosition:inWall(finalPos) then
-
+      -- Logica para mandar para torre aliada
+      if IsSendUnderTurretAlly(myHero,finalPos) then
+        -- logica pra mandar pra torre
         Control.CastSpell(HK_E,Pred.CastPosition)
         lastE = GetTickCount()
+        -- Logica para mandar ele pra parede
+      else if MapPosition:inWall(finalPos) then
 
-        local targetNear = self:GetTarget(self.Menu.combo.comboUltConfig.veryNear:Value())
-        if tagertNear == target and IsValid(targetNear)  then
-          local Pred = GetGamsteronPrediction(targetNear, self.R, myHero)
-          if  Pred.Hitchance >= _G.HITCHANCE_HIGH and Ready(_R)  then
-            Control.CastSpell(HK_R, Pred.CastPosition)
-            lastR = GetTickCount()
-           
+          Control.CastSpell(HK_E,Pred.CastPosition)
+          lastE = GetTickCount()
+          
+          -- se t· na parede e perto dou tb o R
+          local targetNear = self:GetTarget(self.Menu.combo.comboUltConfig.veryNear:Value())
+          if tagertNear == target and IsValid(targetNear)  then
+            local Pred = GetGamsteronPrediction(targetNear, self.R, myHero)
+            if  Pred.Hitchance >= _G.HITCHANCE_HIGH and Ready(_R)  then
+              Control.CastSpell(HK_R, Pred.CastPosition)
+              lastR = GetTickCount()
+            end
+          end
+          
+      else
+        local numAround = self:GetTargetInRange(self.Menu.combo.comboUltConfig.enemysDistance:Value(), target)
+        -- SE MEU LIFE … MAIOR QUE o dele e n„o tem ninguÈm perto, dou E
+        if myHero.health > target.health and numAround == 0 then
+          Control.CastSpell(HK_E,Pred.CastPosition)
+          lastE = GetTickCount()
+        end
+
+        -- Se eu n√£o conseguir nada, tento mandar pra tras
+        for i = 1, Game.TurretCount() do
+          local turret = Game.Turret(i)
+          if turret.isAlly and not turret.dead then
+            if turret.pos:DistanceTo(target.pos) < turret.pos:DistanceTo(myHero.pos) then
+              local Pred = GetGamsteronPrediction(target, self.E, myHero)
+              if  Pred.Hitchance >= _G.HITCHANCE_NORMAL and Ready(_E)  then
+                Control.CastSpell(HK_E,Pred.CastPosition)
+                lastE = GetTickCount()
+              end
+              
+            end
           end
         end
       end
 
-      -- logica pra mandar pra torre
-      if IsSendUnderTurretAlly(myHero,finalPos) then
-        Control.CastSpell(HK_E,Pred.CastPosition)
-        lastE = GetTickCount()
+      end
+
+      -- afastar inimigo de aliado morrendo
+      if self.Menu.combo.EProtect:Value() then
+        target = self:GetTarget(740)
+        numLwHealthAlly = HeroesAroundLowHealthCompMe(380,myHero.pos,TEAM_ALLY)
+        if self.Menu.escape.E:Value()  and lastE +140 and Ready(_E)
+          and IsValid(target) and target.health < myHero.health
+          and numLwHealthAlly>0 then
+          Control.CastSpell(HK_E)
+          lastE = GetTickCount()
+        end
       end
 
 

@@ -42,6 +42,37 @@ function GetDistanceSquared(vec1, vec2)
   return dx * dx + dy * dy
 end
 
+
+function HeroesAround(range, pos, team)
+  pos = pos or myHero.pos
+  team = team or foe
+  Count = 0
+  for i = 1, Game.HeroCount() do
+    hero = Game.Hero(i)
+    if hero and hero.team == team and not hero.dead and GetDistanceSquared(pos, hero.pos) < range then
+      Count = Count + 1
+    end
+  end
+  return Count
+end
+
+
+function HeroesAroundLowHealthCompMe(range, pos, team)
+  
+  pos = pos or myHero.pos
+  team = team or foe
+  Count = 0
+  for i = 1, Game.HeroCount() do
+    hero = Game.Hero(i)
+ 
+    if hero and hero.team == team and not hero.dead  then
+      Count = Count + 1
+    end
+  end
+  return Count
+end
+
+
 function IsValid(unit)
   return  unit
     and unit.valid

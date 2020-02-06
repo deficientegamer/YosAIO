@@ -15,15 +15,15 @@ end
 local version = 0.04
 local hero = myHero.charName
 if hero == "Brand" or hero == "MissFortune" or hero == "Poppy" then
-  print("BotLane AIO 0.04 waiting GSOOrb for 2 second's...")
+  print("SoldierAIO 0.04 waiting GSOOrb for 3 second's...")
   Callback.Add("Load", function()
     DelayAction(function()
       if not AIO then
         AIO = true
         require("BLA_".. hero)
-       print("Load BotLane AIO 0.04 By AcessibilitySoldier")
+       print("Loading SoldierAIO 0.04 Press F6 x2")
       end
-    end, 2)
+    end, 3)
   end)
 
 
