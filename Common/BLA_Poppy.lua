@@ -178,7 +178,7 @@ function Poppy:Combo()
           end
           
       else
-        local numAround = self:GetTargetInRange(self.Menu.combo.comboUltConfig.enemysDistance:Value(), target)
+        local numAround = self:GetTargetInRange(500, target)
         -- SE MEU LIFE É MAIOR QUE o dele e não tem ninguém perto, dou E
         if myHero.health > target.health and numAround == 0 then
           Control.CastSpell(HK_E,Pred.CastPosition)
