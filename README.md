@@ -2,14 +2,15 @@
 This repo is an GOS-EXT AIO for BotLane Champs. This AIO use modernized's lib's.
 
 Details
-+ Brand
+
+# Brand
 
 Combo's
 
-- RWEQ + exhaust or ignition
-- EQW + exhaust or ignition
-- QEW + Escape or e Ignite
-- REQ + escape or and ignite
+- RWEQ # exhaust or ignition
+- EQW # exhaust or ignition
+- QEW # Escape or e Ignite
+- REQ # escape or and ignite
 
 Harass
 - W
@@ -31,7 +32,8 @@ Auto (insecure)
 - E
 - Ignite
 
-+ MissFortune
+# MissFortune
+
 Combo's
 - E
 - W
@@ -45,7 +47,7 @@ Harass
 Escape / escape mode
 - W
 
-Possible Clear's (only 3+ minions)
+Possible Clear's (only 3# minions)
 - E
 - Q
 
@@ -53,7 +55,8 @@ Possible LastHit (Only kill minion)
 - E
 - Q
 
-+ Poppy
+# Poppy
+
 Combo
 - E
 - Q
@@ -78,7 +81,8 @@ Escape
 Auto (insecure)
 -W
 
-+ Galio
+# Galio
+
 Combo
 - R
 - Q
@@ -105,7 +109,8 @@ Auto (insecure)
 - W
 
 
-+ Zed
+# Zed
+
 Combo
 - W
 - R
