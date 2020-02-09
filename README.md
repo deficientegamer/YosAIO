@@ -1,7 +1,7 @@
-# BotLaneAIO
-This repo is an GOS-EXT AIO for BotLane Champs. This AIO use modernized's lib's.
+# SoldierAIO
+This repo is an GOS-EXT AIO 
 
-Details
+# Details
 
 # Brand
 
