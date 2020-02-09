@@ -103,3 +103,25 @@ Escape
 
 Auto (insecure)
 - W
+
+
++ Zed
+Combo
+- W
+- R
+- E
+- Q
+
+Lasthit
+- Q
+
+Harass
+- Q
+
+Clear
+- W
+- Q
+- E
+
+Escape
+- W
