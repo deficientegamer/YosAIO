@@ -11,7 +11,6 @@ class "Galio"
 function Galio:__init()
 
   self.Q = {Type = _G.SPELLTYPE_CIRCLE, delay=0.10, radius=150, range = 825}
-
   self.W = {delay=0.01, radius=0, range = 0}
   self.E = {Type = _G.SPELLTYPE_LINE, range = 650,delay=0.20, speed=2300, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
   self.R = {Type = _G.SPELLTYPE_LINE, range = 4000, width=900, delay=1.25}
@@ -59,7 +58,7 @@ function Galio:LoadMenu()
   self.Menu.combo:MenuElement({id = "EMoreOneHitChance", name = "E 1+ enemy hitchan. and my hp no low", value = true})
   self.Menu.combo:MenuElement({id = "EBackMyAndTowerLife", name = "E enemy back me and tower life", value = true})
 
-  self.Menu.combo:MenuElement({id = "maxE", name = "E max distance in Combo", value = 650, min = 10, max = 650, step = 1})
+  self.Menu.combo:MenuElement({id = "maxE", name = "E max distance in Combo", value = 580, min = 10, max = 650, step = 1})
 
 
   self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
@@ -126,7 +125,7 @@ function Galio:Tick()
 
     -- E Start
     -- afastar inimigo de aliado morrendo
-    target = self:GetTarget(740)
+    target = self:GetTarget(650)
     numLwHealthAlly = HeroesAroundLowHealthCompMe(380,myHero.pos,TEAM_ENEMY)
    
     if self.Menu.escape.E:Value()  and lastE +140 and Ready(_E)
