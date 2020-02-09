@@ -1,16 +1,8 @@
-# SoldierAIO
-To EXT. 
+# BotLaneAIO
+This repo is an GOS-EXT AIO for BotLane Champs. This AIO use modernized's lib's.
 
-# The Project
-AIO created by Accessibility Soldier so that it is possible for disabled people to play games as equals.
-This AIO will exist and will be evolved until the day when the company developing the game creates the necessary features for disabled people to play as equals.
-
-# Message
-Hugs to all my brothers from all over the world who have special needs. You are not alone!
-
-# Details
---------------------------------------------------------------------------------------
-# Brand
+Details
++ Brand
 
 Combo's
 
@@ -35,10 +27,11 @@ Possible LastHit
 
 Auto (insecure)
 - Q
+- W
+- E
 - Ignite
---------------------------------------------------------------------------------------
-# MissFortune
 
++ MissFortune
 Combo's
 - E
 - W
@@ -59,9 +52,8 @@ Possible Clear's (only 3+ minions)
 Possible LastHit (Only kill minion)
 - E
 - Q
---------------------------------------------------------------------------------------
-# Poppy
 
++ Poppy
 Combo
 - E
 - Q
@@ -82,6 +74,32 @@ Clear
 
 Escape
 -W
+
+Auto (insecure)
+-W
+
++ Galio
+Combo
+- R
+- Q
+- E
+- W
+
+Lasthit
+- Q
+- E
+
+Harass
+- Q
+- E
+
+Clear
+- Q
+- E
+
+Escape
+- W
+- E
 
 Auto (insecure)
 - W
