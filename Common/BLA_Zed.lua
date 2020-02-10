@@ -80,7 +80,7 @@ function Zed:LoadMenu()
   self.Menu.clear:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.clear:MenuElement({id = "W", name = "W", value = true})
   self.Menu.clear:MenuElement({id = "E", name = "E", value = true})
-  self.Menu.harass:MenuElement({id = "prediction", name = "HitChance (1=normal,2=high)", value = 1, min = 1, max = 2, step = 1})
+  self.Menu.clear:MenuElement({id = "prediction", name = "HitChance (1=normal,2=high)", value = 1, min = 1, max = 2, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "lastHit", name = "LastHit"})
   self.Menu.lastHit:MenuElement({id = "Q", name = "Q", value = true})
@@ -137,7 +137,7 @@ function Zed:Combo()
   end
 
   for i = 1, #Enemys do
-    if IsValid(target) and (Ready(_W) or Ready(_R)) then
+    if IsValid(target)  then
 
       local numAround = self:GetTargetInRange(self.Menu.combo.maxComboEnemiesDistance:Value(), target)
 
@@ -146,8 +146,8 @@ function Zed:Combo()
         target = self:GetTarget(650)
         -- W Start
 
-        if self.Menu.combo.W:Value()  and lastW +50  < GetTickCount() and Ready(_W)
-          and lastR + 1200 < GetTickCount()  then
+        if IsValid(target) and self.Menu.combo.W:Value()  and lastW +140  < GetTickCount() and Ready(_W)
+         then
 
           Control.CastSpell(HK_W,target.pos)
           lastW = GetTickCount()
@@ -156,21 +156,18 @@ function Zed:Combo()
 
         -- R Start
         target = self:GetTarget(625)
-        local RDmg = getdmg("R", target, myHero, 1)
-        if inUlt==false and IsValid(target) and Ready(_R)  and self.Menu.combo.R:Value()
+        if inUlt==false and IsValid(target) and lastW +600  < GetTickCount() and Ready(_R)  and self.Menu.combo.R:Value()
         then
 
 
           local Pred = GetGamsteronPrediction(target, self.R, myHero)
           -- soltar R quando tem no maximo x enemies
-          if self.Menu.combo.R:Value()
-            and Pred.Hitchance >=   self.Menu.combo.comboPrediction:Value()
-
-            and lastR + 1200 < GetTickCount()  then
+          if Pred.Hitchance >=   self.Menu.combo.comboPrediction:Value() then
        
             Control.CastSpell(HK_R, Pred.CastPosition)
             lastR = GetTickCount()
             inUlt=true
+			print("ult")
           end
 
         end
@@ -181,9 +178,9 @@ function Zed:Combo()
 
 
       -- E Start
-      target = self:GetTarget(50)
+      target = self:GetTarget(80)
 
-      if self.Menu.combo.E:Value()  and lastE +50  < GetTickCount() and Ready(_E) and IsValid(target) then
+      if self.Menu.combo.E:Value()  and lastE +30  < GetTickCount() and Ready(_E) and IsValid(target) then
 
         local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
         local Pred = GetGamsteronPrediction(target, self.E, myHero)
@@ -196,11 +193,14 @@ function Zed:Combo()
 
 
       -- Q Start
-      target = self:GetTarget(925)
-      if IsValid(target) and Ready(_Q) and lastQ + 750 < GetTickCount() then
+      target = self:GetTarget(900)
+	
+      if IsValid(target) and Ready(_Q) and lastQ + 60 < GetTickCount() then
         if self.Menu.combo.Q:Value()  then
+		    print("teste")
           local Pred = GetGamsteronPrediction(target, self.Q, myHero)
           if Pred.Hitchance >=   self.Menu.combo.comboPrediction:Value() then
+		      print("teste2")
             Control.CastSpell(HK_Q, Pred.CastPosition)
             lastQ = GetTickCount()
             return
@@ -218,11 +218,29 @@ function Zed:Harass()
 
 
   local target = nil
+    target = self:GetTarget(625)
+  -- W Start
+    if self.Menu.harass.W:Value()  and lastW +140  < GetTickCount() and Ready(_W) then
+      Control.CastSpell(HK_W,target)
+      lastW = GetTickCount()
+    end
+    -- W End
+	
+	target = self:GetTarget(90)
+	if self.Menu.harass.E:Value()  and lastE +30  < GetTickCount() and Ready(_E) and IsValid(target) then
 
+      local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
+      local Pred = GetGamsteronPrediction(target, self.E, myHero)
+      if Pred.Hitchance >=   self.Menu.harass.prediction:Value()  then
+        Control.CastSpell(HK_E,Pred.CastPosition)
+        lastE = GetTickCount()
+      end
+    end
 
   -- Q Start
   target = self:GetTarget(900)
-  if self.Menu.harass.Q:Value()  and IsValid(target) and Ready(_Q) and lastQ + 750 < GetTickCount() then
+
+  if self.Menu.harass.Q:Value()  and IsValid(target) and Ready(_Q) and lastQ + 60 < GetTickCount() then
 
     local Pred = GetGamsteronPrediction(target, self.Q, myHero)
     if Pred.Hitchance >=   self.Menu.harass.prediction:Value() then
@@ -245,13 +263,13 @@ function Zed:Clear()
 
 
     -- W Start
-    if self.Menu.clear.W:Value()  and lastW +50  < GetTickCount() and Ready(_W) then
+    if self.Menu.clear.W:Value()  and lastW +140  < GetTickCount() and Ready(_W) then
       Control.CastSpell(HK_W,target)
       lastW = GetTickCount()
     end
     -- W End
 
-    if self.Menu.clear.E:Value()  and lastE +50  < GetTickCount() and Ready(_E) and IsValid(target) then
+    if self.Menu.clear.E:Value()  and lastE +30  < GetTickCount() and Ready(_E) and IsValid(target) then
 
       local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
       local Pred = GetGamsteronPrediction(target, self.E, myHero)
@@ -262,8 +280,15 @@ function Zed:Clear()
     end
 
 
-    -- Q
-    if self.Menu.clear.Q:Value()  and IsValid(target) and Ready(_Q) and lastQ + 750 < GetTickCount() then
+    
+  end
+
+ local eMinions = SDK.ObjectManager:GetEnemyMinions(900)
+  for i = 1, #eMinions do
+    local target = eMinions[i]
+
+-- Q
+    if self.Menu.clear.Q:Value()  and IsValid(target) and Ready(_Q) and lastQ + 60 < GetTickCount() then
       if self.Menu.combo.Q:Value()  then
         local Pred = GetGamsteronPrediction(target, self.Q, myHero)
         if Pred.Hitchance >= self.Menu.clear.prediction:Value() then
@@ -274,8 +299,8 @@ function Zed:Clear()
       end
     end
     -- Q End
-  end
-
+	
+	end
 
 end
 
@@ -288,7 +313,7 @@ function Zed:LastHit()
     local target = eMinions[i]
 
     -- Q
-    if self.Menu.lastHit.Q:Value()  and IsValid(target) and Ready(_Q) and lastQ + 750 < GetTickCount() then
+    if self.Menu.lastHit.Q:Value()  and IsValid(target) and Ready(_Q) and lastQ + 60 < GetTickCount() then
       if self.Menu.combo.Q:Value()  then
         local Pred = GetGamsteronPrediction(target, self.Q, myHero)
         if Pred.Hitchance >= self.Menu.lastHit.prediction:Value() then
