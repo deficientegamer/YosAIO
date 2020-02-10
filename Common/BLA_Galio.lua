@@ -48,7 +48,7 @@ function Galio:LoadMenu()
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.combo:MenuElement({id = "maxQ", name = "q max distance in Combo", value = 700, min = 30, max = 825, step = 1})
 
-  self.Menu.combo:MenuElement({id = "W", name = "W - if my hp < hp enemy", value = true})
+  self.Menu.combo:MenuElement({id = "W", name = "W - after E", value = true})
 
   self.Menu.combo:MenuElement({id = "E", name = "E", value = true})
   self.Menu.combo:MenuElement({id = "EWithoutLogics", name = "E without logics", value = false})
@@ -83,7 +83,7 @@ function Galio:LoadMenu()
 
 
   self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto (insecure)"})
-  self.Menu.auto:MenuElement({id = "W", name = "W", value = true})
+  self.Menu.auto:MenuElement({id = "W", name = "W", value = false})
 
   self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape (use Orb Key)"})
   self.Menu.escape:MenuElement({id = "W", name = "W if have >= 1 enemy's <", value = true})
@@ -102,6 +102,7 @@ function Galio:Tick()
   if myHero.dead or Game.IsChatOpen() or (ExtLibEvade and ExtLibEvade.Evading == true) then
     return
   end
+
 
   self:Auto()
 
@@ -127,7 +128,7 @@ function Galio:Tick()
     -- afastar inimigo de aliado morrendo
     target = self:GetTarget(650)
     numLwHealthAlly = HeroesAroundLowHealthCompMe(380,myHero.pos,TEAM_ENEMY)
-   
+
     if self.Menu.escape.E:Value()  and lastE +140 and Ready(_E)
       and IsValid(target)
       and (target.health*1.30) < myHero.health
@@ -199,6 +200,14 @@ function Galio:Combo()
         Control.CastSpell(HK_E,Pred.CastPosition)
         lastE = GetTickCount()
         inE=true
+        -- W AFTER 1
+        DelayAction(
+          function()
+            Control.CastSpell(HK_W,Pred.CastPosition)
+            lastW = GetTickCount()
+            inUlt=false
+          end,1
+        )
       end
 
       -- Se estiver dentro da minha torre jogo pro alto
@@ -206,6 +215,14 @@ function Galio:Combo()
         Control.CastSpell(HK_E,Pred.CastPosition)
         lastE = GetTickCount()
         inE=true
+        -- W AFTER 1
+        DelayAction(
+          function()
+            Control.CastSpell(HK_W,Pred.CastPosition)
+            lastW = GetTickCount()
+            inUlt=false
+          end,1
+        )
       else
 
         numAround = HeroesAroundLowHealthCompMe(500,myHero.pos,TEAM_ENEMY)
@@ -220,6 +237,14 @@ function Galio:Combo()
           Control.CastSpell(HK_E,Pred.CastPosition)
           lastE = GetTickCount()
           inE=true
+          -- W AFTER 1
+          DelayAction(
+            function()
+              Control.CastSpell(HK_W,Pred.CastPosition)
+              lastW = GetTickCount()
+              inUlt=false
+            end,1
+          )
         end
 
         --´se ele estiver sozinho e eu tiver com um amigo
@@ -230,6 +255,14 @@ function Galio:Combo()
           Control.CastSpell(HK_E,Pred.CastPosition)
           lastE = GetTickCount()
           inE=true
+          -- W AFTER 1
+          DelayAction(
+            function()
+              Control.CastSpell(HK_W,Pred.CastPosition)
+              lastW = GetTickCount()
+              inUlt=false
+            end,1
+          )
         end
 
 
@@ -254,6 +287,14 @@ function Galio:Combo()
                   Control.CastSpell(HK_E,Pred.CastPosition)
                   lastE = GetTickCount()
                   inE=true
+                  -- W AFTER 1
+                  DelayAction(
+                    function()
+                      Control.CastSpell(HK_W,Pred.CastPosition)
+                      lastW = GetTickCount()
+                      inUlt=false
+                    end,1
+                  )
                 end
               end
             end
@@ -263,14 +304,6 @@ function Galio:Combo()
 
     end
 
-    -- W
-    target = self:GetTarget(600)
-    if Ready(_W) and IsValid(target) and (myHero.health/1.3) < target.health then
-      Control.CastSpell(HK_W)
-      lastW = GetTickCount()
-    end
-    -- W End
-
   end
 
 end
@@ -278,7 +311,7 @@ end
 function Galio:Auto()
   -- W Start
   if self.Menu.auto.W:Value()  and lastW +160  < GetTickCount() and Ready(_W)
-    and self:HeroesAround(700,myHero.pos,TEAM_ENEMY)>2  then
+    and self:HeroesAround(400,myHero.pos,TEAM_ENEMY)>2 and inUlt==false  then
     Control.CastSpell(HK_W)
     lastW = GetTickCount()
   end
@@ -328,7 +361,7 @@ function Galio:Clear()
     if self.Menu.clear.Q:Value() and IsValid(target) and Ready(_Q) and lastQ + 150 < GetTickCount()
     then
 
-      local count = GetMinionCount(310, target)
+      local count = GetMinionCount(150, target)
 
       if  self.Menu.clear.QMin:Value() >= count then
 
@@ -351,12 +384,12 @@ function Galio:Clear()
     local target = eMinions[i]
 
     -- E
-   
+
     if self.Menu.clear.E:Value() and IsValid(target) and Ready(_E) and lastE + 120 < GetTickCount()  then
-    
+
       local Pred = GetGamsteronPrediction(target, self.E, myHero)
       if Pred.Hitchance >= _G.HITCHANCE_NORMAL then
-   
+
         Control.CastSpell(HK_E,Pred.CastPosition)
         lastE = GetTickCount()
         inE=true
