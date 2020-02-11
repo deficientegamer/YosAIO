@@ -47,7 +47,7 @@ function Zed:LoadMenu()
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "maxComboEnemies", name = "Max Enemies near target in combo", value = 1, min = 0, max = 4, step = 1})
   self.Menu.combo:MenuElement({id = "maxComboEnemiesDistance", name = "Distance to Max Enemies", value = 400, min = 0, max = 2200, step = 1})
-  self.Menu.combo:MenuElement({id = "comboPrediction", name = "HitChance (1=normal,2=high)", value = 2, min = 1, max = 2, step = 1})
+  self.Menu.combo:MenuElement({id = "comboPrediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
 
@@ -74,18 +74,18 @@ function Zed:LoadMenu()
   self.Menu.harass:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.harass:MenuElement({id = "W", name = "W", value = true})
   self.Menu.harass:MenuElement({id = "E", name = "E", value = true})
-  self.Menu.harass:MenuElement({id = "prediction", name = "HitChance (1=normal,2=high)", value = 2, min = 1, max = 2, step = 1})
+  self.Menu.harass:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "clear", name = "Clear"})
   self.Menu.clear:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.clear:MenuElement({id = "W", name = "W", value = true})
   self.Menu.clear:MenuElement({id = "E", name = "E", value = true})
-  self.Menu.clear:MenuElement({id = "prediction", name = "HitChance (1=normal,2=high)", value = 1, min = 1, max = 2, step = 1})
+  self.Menu.clear:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "lastHit", name = "LastHit"})
   self.Menu.lastHit:MenuElement({id = "Q", name = "Q", value = true})
   
-  self.Menu.lastHit:MenuElement({id = "prediction", name = "HitChance (1=normal,2=high)", value = 2, min = 1, max = 2, step = 1})
+  self.Menu.lastHit:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape (use Orb Key)"})
   self.Menu.escape:MenuElement({id = "W", name = "W if my health * 1.4 <", value = true})
