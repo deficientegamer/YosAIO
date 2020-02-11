@@ -194,7 +194,7 @@ function Brand:Combo()
     if IsValid(target) then
 
       if self.Menu.combo.R:Value() and Ready(_R)
-        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*(self.Menu.combo.dmgMultiplierR:Value()/10) > hero.health)  then
+        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
         Control.CastSpell(HK_R, hero)
         lastR = GetTickCount()
         return
