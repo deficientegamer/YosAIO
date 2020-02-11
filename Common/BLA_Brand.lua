@@ -38,7 +38,7 @@ end
 
 function Brand:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLABrand", name = "SoldierAIO Brand RC 0.3"})
+  self.Menu = MenuElement({type = MENU, id = "BLABrand", name = "SoldierAIO Brand RC 0.4"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
@@ -51,14 +51,14 @@ function Brand:LoadMenu()
   self.Menu.combo:MenuElement({id = "ignite", name = "Ignite in Combo", value = true})
   self.Menu.combo:MenuElement({id = "ignitehp", name = "Ignite HP:", value = 35, min = 5, max = 95, identifier = "%"})
   self.Menu.combo:MenuElement({id = "exaust", name = "Exhaust in Combo", value = true})
-  self.Menu.combo:MenuElement({id = "prediction", name = "Q HitChance (1=normal;2=high)", value = 2, min = 1, max =2, step = 1})
+  self.Menu.combo:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
 
   self.Menu:MenuElement({type = MENU, id = "harass", name = "Harass"})
   self.Menu.harass:MenuElement({id = "W", name = "use W", value = true})
   self.Menu.harass:MenuElement({id = "E", name = "use E", value = true})
   self.Menu.harass:MenuElement({id = "Q", name = "use Q", value = true})
-  self.Menu.harass:MenuElement({id = "prediction", name = "HitChance (1=normal;2=high)", value = 2, min = 1, max =2, step = 1})
+  self.Menu.harass:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto (Insecure)"})
   self.Menu.auto:MenuElement({id = "use", name = "Use", value = false})
@@ -70,7 +70,7 @@ function Brand:LoadMenu()
   self.Menu.auto:MenuElement({id = "E", name = "auto E if Buff count 2", value = false})
   self.Menu.auto:MenuElement({type = MENU, id = "AntiDash", name = "E Anti Dash Target"})
   OnEnemyHeroLoad(function(hero) self.Menu.auto.AntiDash:MenuElement({id = hero.charName, name = hero.charName, value = false}) end)
-  self.Menu.auto:MenuElement({id = "prediction", name = "HitChance (1=normal;2=high)", value = 2, min = 1, max =2, step = 1})
+  self.Menu.auto:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
   self.Menu:MenuElement({type = MENU, id = "clear", name = "Clear"})
   self.Menu.clear:MenuElement({id = "W", name = "W on 3 minions +", value = true})
@@ -80,11 +80,17 @@ function Brand:LoadMenu()
   self.Menu:MenuElement({type = MENU, id = "lastHit", name = "LastHit"})
   self.Menu.lastHit:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.lastHit:MenuElement({id = "E", name = "E", value = true})
-  self.Menu.lastHit:MenuElement({id = "prediction", name = "HitChance (1=normal;2=high)", value = 2, min = 1, max =2, step = 1})
+  self.Menu.lastHit:MenuElement({id = "prediction", name = "HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
 
 
   self.Menu:MenuElement({type = MENU, id = "escape", name = "Escape"})
   self.Menu.escape:MenuElement({id = "exaust", name = "Exhaust", value = true})
+
+  self.Menu:MenuElement({type = MENU, id = "settings", name = "Settings"})
+  self.Menu.settings:MenuElement({id = "predW", name = "Use Pred in W", value = true})
+  self.Menu.settings:MenuElement({id = "forceFocus", name = "Force combo in first target ", value = false})
+  self.Menu.settings:MenuElement({id = "predictionW", name = "W HitChance (2=normal;3=high;4=immobile)", value = 3, min = 2, max =4, step = 1})
+
 
   self.Menu:MenuElement({type = MENU, id = "Drawing", name = "Drawing"})
   self.Menu.Drawing:MenuElement({id = "Q", name = "Draw [Q] Range", value = true})
@@ -122,40 +128,194 @@ end
 
 function Brand:Combo()
   local target = nil
+  -- verifica se é pra focar ou não
+  if self.Menu.settings.forceFocus:Value() then
+    -- força o foco da sequencia em um alvo só
 
+    target = self:GetTarget(860)
 
-
-  target = self:GetTarget(1000)
-  if IsValid(target) then
-    if self.Menu.combo.Q:Value()
-      and Ready(_Q) and lastQ + 550 < GetTickCount() then
-
-
-      local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
-      local hasBuff, duration = self:HasPassiveBuff(target)
-      local time = 0.25 + distanceSqr/(1600*1600)
-      if hasBuff and duration >= time then
-        local Pred = GetGamsteronPrediction(target, self.Q, myHero)
-        if Pred.Hitchance >= self.Menu.auto.prediction:Value() then
-          Control.CastSpell(HK_Q, Pred.CastPosition)
-          lastQ = GetTickCount()
-          return
-        end
-      end
-    end
-  end
-
-  target = self:GetTarget(900)
-  if self.Menu.combo.W:Value() and lastW + 80 < GetTickCount() and Ready(_W) and IsValid(target) then
-    if target and self.Menu.combo.W:Value() then
-      self:CastW(target)
-    end
-
-    -- E
-    target = self:GetTarget(600)
+    -- nesse caso eu tenho sempre que ver a distancia
     if IsValid(target) then
       local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
 
+      -- Q se tiver em chamas
+
+      if IsValid(target) and distanceSqr < 1000*100 then
+        if self.Menu.combo.Q:Value()
+          and Ready(_Q) and lastQ + 60 < GetTickCount()  and IsValid(target) then
+          local hasBuff, duration = self:HasPassiveBuff(target)
+          local time = 0.25 + distanceSqr/(1600*1600)
+          if hasBuff and duration >= time then
+            local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+            if Pred.Hitchance >= self.Menu.combo.prediction:Value() then
+              Control.CastSpell(HK_Q, Pred.CastPosition)
+              lastQ = GetTickCount()
+              return
+            end
+          end
+        end
+      end
+      -- END Q
+
+      -- W para começar o combo
+      if self.Menu.combo.W:Value() and lastW + 80 < GetTickCount() and Ready(_W) and IsValid(target)
+        and distanceSqr < 860*860 then
+        self:CastW(target)
+        -- tento dar o E depois do W no mesmo alvo
+        DelayAction(
+          function()
+            Control.CastSpell(HK_E, target)
+            lastE = GetTickCount()
+          end, 1
+        )
+      end
+      -- W END
+
+      -- Se o E do delay não pegar eu tento dar E em quem tiver buffado
+
+      if self.Menu.combo.E:Value() and Ready(_E) and lastE +60 < GetTickCount()
+        and distanceSqr < 625*625 and IsValid(target) then
+        local hasBuff, duration, count = self:HasPassiveBuff(target)
+        if hasBuff and count > 0 then
+          Control.CastSpell(HK_E, target)
+          lastE = GetTickCount()
+        end
+      end
+
+
+      -- E, se ninguém está bufado dou E dou no primeiro que achar pra tentar dar stun com o Q
+
+      if IsValid(target) then
+
+        if Ready(_E) and lastE +60 < GetTickCount() and distanceSqr < 625*625  and IsValid(target) then
+          if target and self.Menu.combo.E:Value() then
+            Control.CastSpell(HK_E,target)
+            lastE = GetTickCount()
+          end
+        end
+      end
+
+      -- Q, tento stunar (only buffed)
+
+      if IsValid(target) and distanceSqr < 1000*1000 then
+        if self.Menu.combo.Q:Value()
+          and Ready(_Q) and lastQ + 60 < GetTickCount() and IsValid(target) then
+          local hasBuff, duration = self:HasPassiveBuff(target)
+          local time = 0.25 + distanceSqr/(1600*1600)
+          if hasBuff and duration >= time then
+            local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+            if Pred.Hitchance >= self.Menu.combo.prediction:Value() then
+              Control.CastSpell(HK_Q, Pred.CastPosition)
+              lastQ = GetTickCount()
+              return
+            end
+          end
+        end
+      end
+
+      -- R, se tiver gente perto ou for possivel matar
+      for i = 1, #Enemys do
+        local hero = Enemys[i]
+        local numAround = self:GetTargetInRange(650, hero)
+        local RDmg = getdmg("R", hero, myHero, 1)
+        if IsValid(target) then
+
+          if self.Menu.combo.R:Value() and lastQ + 750 and Ready(_R)
+            and distanceSqr < 625*625 and IsValid(target)
+            and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
+            Control.CastSpell(HK_R, hero)
+            lastR = GetTickCount()
+          end
+        end
+      end
+
+      if IsValid(target) then
+
+        if target and self.Menu.combo.Q:Value() and Ready(_Q) and Ready(_E) and lastQ + 60 < GetTickCount()  then
+          local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+          if Pred.Hitchance >= self.Menu.combo.prediction:Value()
+            and GetDistanceSquared(myHero.pos, Pred.CastPosition) >= self.Menu.combo.minQ:Value()^2
+            and GetDistanceSquared(myHero.pos, Pred.CastPosition) < self.E.range^2
+          then
+            Control.CastSpell(HK_Q, Pred.CastPosition)
+            lastQ = GetTickCount()
+            DelayAction(
+              function()
+                Control.CastSpell(HK_E, target)
+                lastE = GetTickCount()
+              end, 1
+            )
+            return
+          end
+        end
+      end
+      -- E
+
+      if IsValid(target) then
+        if target and self.Menu.combo.E:Value() and Ready(_E)
+          and lastE + 60 < GetTickCount() then
+          local Pred = GetGamsteronPrediction(target, self.E, myHero)
+          if Pred.Hitchance >= self.Menu.combo.prediction:Value() then
+            Control.CastSpell(HK_E, target)
+            lastE = GetTickCount()
+            return
+          end
+        end
+      end
+    end
+
+  else
+    -- Deixa o orb escolher os alvos durante o combo
+
+    -- Q se tiver em chamas
+    target = self:GetTarget(1000)
+    if IsValid(target) then
+      if self.Menu.combo.Q:Value()
+        and Ready(_Q) and lastQ + 550 < GetTickCount() then
+        local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
+        local hasBuff, duration = self:HasPassiveBuff(target)
+        local time = 0.25 + distanceSqr/(1600*1600)
+        if hasBuff and duration >= time then
+          local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+          if Pred.Hitchance >= self.Menu.combo.prediction:Value() then
+            Control.CastSpell(HK_Q, Pred.CastPosition)
+            lastQ = GetTickCount()
+            return
+          end
+        end
+      end
+    end
+    -- END Q
+
+    -- W para começar o combo
+    target = self:GetTarget(900)
+    if self.Menu.combo.W:Value() and lastW + 80 < GetTickCount() and Ready(_W) and IsValid(target) then
+      self:CastW(target)
+      -- tento dar o E depois do W no mesmo alvo
+      DelayAction(
+        function()
+          Control.CastSpell(HK_E, target)
+          lastE = GetTickCount()
+        end, 1
+      )
+    end
+    -- W END
+
+    -- Se o E do delay não pegar eu tento dar E em quem tiver buffado
+    target = self:GetTarget(625)
+    if self.Menu.combo.E:Value() and Ready(_E) and lastE +60 < GetTickCount() and IsValid(target) then
+      local hasBuff, duration, count = self:HasPassiveBuff(target)
+      if hasBuff and count > 0 then
+        Control.CastSpell(HK_E, target)
+        lastE = GetTickCount()
+      end
+    end
+
+
+    -- E, se ninguém está bufado dou E dou no primeiro que achar pra tentar dar stun com o Q
+    target = self:GetTarget(625)
+    if IsValid(target) then
+      local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
       if Ready(_E) and lastE +60 < GetTickCount() and distanceSqr < 625*625 then
         if target and self.Menu.combo.E:Value() then
           Control.CastSpell(HK_E,target)
@@ -164,11 +324,10 @@ function Brand:Combo()
       end
     end
 
-    target = self:GetTarget(1000)
+    -- Q, tento stunar (only buffed)
+    target = self:GetTarget(980)
     if IsValid(target) then
-
       local distanceSqr = GetDistanceSquared(myHero.pos, target.pos)
-
       if self.Menu.combo.Q:Value()
         and Ready(_Q) and lastQ + 60 < GetTickCount() then
         local hasBuff, duration = self:HasPassiveBuff(target)
@@ -184,56 +343,59 @@ function Brand:Combo()
       end
     end
 
+    -- R, se tiver gente perto ou for possivel matar
+    for i = 1, #Enemys do
+      local hero = Enemys[i]
+      local numAround = self:GetTargetInRange(650, hero)
+      local RDmg = getdmg("R", hero, myHero, 1)
+      if IsValid(target) then
 
-  end
-
-  for i = 1, #Enemys do
-    local hero = Enemys[i]
-    local numAround = self:GetTargetInRange(650, hero)
-    local RDmg = getdmg("R", hero, myHero, 1)
+        if self.Menu.combo.R:Value() and lastQ + 750 and Ready(_R)
+          and IsValid(target)
+          and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
+          Control.CastSpell(HK_R, hero)
+          lastR = GetTickCount()
+        end
+      end
+    end
+    -- Q With E
+    target = self:GetTarget(900)
     if IsValid(target) then
 
-      if self.Menu.combo.R:Value() and Ready(_R)
-        and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
-        Control.CastSpell(HK_R, hero)
-        lastR = GetTickCount()
-        return
+      if target and self.Menu.combo.Q:Value() and Ready(_Q) and Ready(_E) and lastQ + 60 < GetTickCount()
+        and IsValid(target)  then
+        local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+        if Pred.Hitchance >= self.Menu.combo.prediction:Value()
+          and GetDistanceSquared(myHero.pos, Pred.CastPosition) >= self.Menu.combo.minQ:Value()^2
+          and GetDistanceSquared(myHero.pos, Pred.CastPosition) < self.E.range^2
+        then
+          Control.CastSpell(HK_Q, Pred.CastPosition)
+          lastQ = GetTickCount()
+          DelayAction(
+            function()
+              Control.CastSpell(HK_E, target)
+              lastE = GetTickCount()
+            end, 1
+          )
+          return
+        end
       end
     end
-  end
-  -- Q With E
-  target = self:GetTarget(900)
-  if IsValid(target) then
+    -- E
 
-    if target and self.Menu.combo.Q:Value() and Ready(_Q) and Ready(_E) and lastQ + 60 < GetTickCount()  then
-      local Pred = GetGamsteronPrediction(target, self.Q, myHero)
-      if Pred.Hitchance >= self.Menu.combo.prediction:Value()
-        and GetDistanceSquared(myHero.pos, Pred.CastPosition) >= self.Menu.combo.minQ:Value()^2
-        and GetDistanceSquared(myHero.pos, Pred.CastPosition) < self.E.range^2
-      then
-        Control.CastSpell(HK_Q, Pred.CastPosition)
-        lastQ = GetTickCount()
-        DelayAction(
-          function()
-            Control.CastSpell(HK_E, target)
-            lastE = GetTickCount()
-          end, 1
-        )
+    target = self:GetTarget(625)
+    if IsValid(target) then
+      if target and self.Menu.combo.E:Value() and Ready(_E)
+        and lastE + 60 < GetTickCount() then
+        local Pred = GetGamsteronPrediction(target, self.E, myHero)
+        if Pred.Hitchance >= self.Menu.combo.prediction:Value() then
+          Control.CastSpell(HK_E, target)
+          lastE = GetTickCount()
+          return
+        end
       end
     end
-  end
 
-  target = self:GetTarget(625)
-  if IsValid(target) then
-
-    if target and self.Menu.combo.E:Value() and Ready(_E)
-      and lastE + 60 < GetTickCount() then
-      local Pred = GetGamsteronPrediction(target, self.E, myHero)
-      if Pred.Hitchance >= self.Menu.combo.prediction:Value() then
-        Control.CastSpell(HK_E, target)
-        lastE = GetTickCount()
-      end
-    end
   end
 
 end
@@ -242,7 +404,6 @@ function Brand:Harass()
   local  target = self:GetTarget(900)
   if self.Menu.harass.W:Value() and lastW + 80 < GetTickCount() and target  and Ready(_W) and IsValid(target) then
     self:CastW(target)
-
     lastW = GetTickCount()
   end
 
@@ -380,6 +541,8 @@ function Brand:Auto()
     local hero = Enemys[i]
     if IsValid(hero) then
       local distanceSqr = GetDistanceSquared(myHero.pos, hero.pos)
+
+      -- R
       if Ready(_R) and lastR + 750 < GetTickCount() and distanceSqr < self.R.range^2 then
         local numAround = self:GetTargetInRange(480, hero)
         if self.Menu.auto.R:Value() and numAround >= self.Menu.auto.minAutoR:Value() then
@@ -387,10 +550,27 @@ function Brand:Auto()
           lastR = GetTickCount()
         end
       end
+      -- R END
 
+      -- W
+      local target = hero
+      if self.Menu.combo.W:Value() and lastW + 80 < GetTickCount() and Ready(_W)
+        and distanceSqr < self.Menu.auto.maxRange:Value() ^2
+      then
+        self:CastW(target)
+        -- tento dar o E depois do W no mesmo alvo
+        DelayAction(
+          function()
+            Control.CastSpell(HK_E, target)
+            lastE = GetTickCount()
+          end, 1
+        )
+      end
+      -- W END
 
+      -- Q
       if self.Menu.auto.Q:Value() and distanceSqr < self.Menu.auto.maxRange:Value() ^2
-        and Ready(_Q) and lastQ + 550 < GetTickCount() then
+        and Ready(_Q) and lastQ + 60 < GetTickCount() then
         local hasBuff, duration = self:HasPassiveBuff(hero)
         local time = 0.25 + distanceSqr/(1600*1600)
         if hasBuff and duration >= time then
@@ -402,15 +582,8 @@ function Brand:Auto()
           end
         end
       end
+      -- Q end
 
-      if self.Menu.auto.W:Value() and Ready(_W) and lastW + 700 < GetTickCount() and distanceSqr < 900*900 then
-        local Pred = GetGamsteronPrediction(hero, self.W, myHero)
-        if Pred.Hitchance >= _G.HITCHANCE_IMMOBILE then
-          Control.CastSpell(HK_W, Pred.CastPosition)
-          lastW = GetTickCount()
-          return
-        end
-      end
 
       -- AntiDash thanks D3ftsu
       if self.Menu.auto.AntiDash[hero.charName]
@@ -425,7 +598,7 @@ function Brand:Auto()
         lastE = GetTickCount()
         return
       end
-
+      -- e se tiver buff
       if self.Menu.auto.E:Value() and Ready(_E) and lastE +60 < GetTickCount() and distanceSqr < 625*625 then
         local hasBuff, duration, count = self:HasPassiveBuff(hero)
         if hasBuff and count == 2 then
@@ -433,8 +606,8 @@ function Brand:Auto()
           lastE = GetTickCount()
           return
         end
-
       end
+
     end
   end
 end
@@ -481,12 +654,17 @@ function Brand:castExaust()
 end
 
 function Brand:CastW(target)
-  if Ready(_W) and lastW + 600 < GetTickCount() then
-
-    local Pred = GetGamsteronPrediction(target, self.W, myHero)
-
-    if Pred.Hitchance >= _G.HITCHANCE_HIGH then
-      Control.CastSpell(HK_W, Pred.CastPosition)
+  if lastW + 60 < GetTickCount() and Ready(_W)  and IsValid(target) then
+    if self.Menu.settings.predW:Value() then
+      -- W com pred
+      local Pred = GetGamsteronPrediction(target, self.W, myHero)
+      if Pred.Hitchance >= self.Menu.settings.predictionW:Value() then
+        Control.CastSpell(HK_W, Pred.CastPosition)
+        lastW = GetTickCount()
+      end
+    else
+      -- W sem pred
+      Control.CastSpell(HK_W, target)
       lastW = GetTickCount()
     end
   end

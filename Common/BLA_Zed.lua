@@ -167,7 +167,7 @@ function Zed:Combo()
             Control.CastSpell(HK_R, Pred.CastPosition)
             lastR = GetTickCount()
             inUlt=true
-			print("ult")
+			
           end
 
         end
@@ -197,10 +197,10 @@ function Zed:Combo()
 	
       if IsValid(target) and Ready(_Q) and lastQ + 60 < GetTickCount() then
         if self.Menu.combo.Q:Value()  then
-		    print("teste")
+		   
           local Pred = GetGamsteronPrediction(target, self.Q, myHero)
           if Pred.Hitchance >=   self.Menu.combo.comboPrediction:Value() then
-		      print("teste2")
+		     
             Control.CastSpell(HK_Q, Pred.CastPosition)
             lastQ = GetTickCount()
             return
