@@ -372,7 +372,7 @@ function Poppy:Clear()
     -- E End
 
     -- Q Start
-    if IsValid(target) and Ready(_Q) and lastQ + 120 < GetTickCount()
+    if self.Menu.clear.Q:Value()  and lastQ + 120 < GetTickCount() and IsValid(target) and Ready(_Q) 
       and  myHero.pos:DistanceTo(target.pos) < 200 then
       Control.CastSpell(HK_Q, target)
       lastQ = GetTickCount()
