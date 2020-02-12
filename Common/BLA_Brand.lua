@@ -26,7 +26,7 @@ function Brand:__init()
 
   Orb:OnPreMovement(
     function(args)
-      if lastMove + 220 > GetTickCount() then
+      if lastMove + 60 > GetTickCount() then
         args.Process = false
       else
         args.Process = true
@@ -555,7 +555,7 @@ function Brand:Auto()
       -- W
       local target = hero
       if self.Menu.combo.W:Value() and lastW + 80 < GetTickCount() and Ready(_W)
-        and distanceSqr < self.Menu.auto.maxRange:Value() ^2
+        and distanceSqr < self.W.range^2
       then
         self:CastW(target)
         -- tento dar o E depois do W no mesmo alvo
@@ -570,7 +570,8 @@ function Brand:Auto()
 
       -- Q
       if self.Menu.auto.Q:Value() and distanceSqr < self.Menu.auto.maxRange:Value() ^2
-        and Ready(_Q) and lastQ + 60 < GetTickCount() then
+        and Ready(_Q) and lastQ + 60 < GetTickCount()
+		and and distanceSqr < self.Q.range^2 then
         local hasBuff, duration = self:HasPassiveBuff(hero)
         local time = 0.25 + distanceSqr/(1600*1600)
         if hasBuff and duration >= time then
@@ -588,14 +589,24 @@ function Brand:Auto()
       -- AntiDash thanks D3ftsu
       if self.Menu.auto.AntiDash[hero.charName]
         and self.Menu.auto.AntiDash[hero.charName]:Value()
+		and distanceSqr < self.Q.range^2
+		and distanceSqr < self.E.range^2
         and hero.pathing.isDashing
         and hero.pathing.dashSpeed>0
+		and lastE+60 < GetTickCount()
+		and lastQ+60 < GetTickCount()
         and Ready(_Q)
         and Ready(_E)
-        and lastE+60 < GetTickCount()
-        and distanceSqr < 625*625 then
+        then
         Control.CastSpell(HK_E, hero)
         lastE = GetTickCount()
+		 -- tento dar o Q depois do E no mesmo alvo
+        DelayAction(
+          function()    
+			Control.CastSpell(HK_Q, hero)
+			lastQ = GetTickCount()
+          end, 0.75
+        )
         return
       end
       -- e se tiver buff
