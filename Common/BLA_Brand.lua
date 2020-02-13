@@ -140,7 +140,7 @@ function Brand:Combo()
 
       -- Q se tiver em chamas
 
-      if IsValid(target) and distanceSqr < 1000*100 then
+      if IsValid(target) and distanceSqr < 1000*1000 then
         if self.Menu.combo.Q:Value()
           and Ready(_Q) and lastQ + 60 < GetTickCount()  and IsValid(target) then
           local hasBuff, duration = self:HasPassiveBuff(target)
