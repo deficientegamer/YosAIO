@@ -9,7 +9,7 @@ function Brand:__init()
   self.Q = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Speed = 1600 , range = 1050, width = 60, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
   self.W = {Type = _G.SPELLTYPE_CIRCLE, Delay = 0.9, Speed = math.huge , range = 900, radius = 200}
   self.E = {range = 625}
-  self.R = {range = 750}
+  self.R = {range = 750, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_ENEMYHERO, _G.COLLISION_YASUOWALL}}
 
   self:LoadMenu()
 
@@ -47,7 +47,7 @@ function Brand:LoadMenu()
   self.Menu.combo:MenuElement({id = "R", name = "R", value = true})
   self.Menu.combo:MenuElement({id = "minQ", name = "Q min distance in Combo", value = 320, min = 0, max = 625, step = 1})
   self.Menu.combo:MenuElement({id = "minComboR", name = "R min enemy's in Combo", value = 1, min = 1, max = 5, step = 1})
-  self.Menu.combo:MenuElement({id = "dmgMultiplierR", name = "R damge multiplier", value = 25, min = 10, max = 50, step = 1})
+  self.Menu.combo:MenuElement({id = "dmgMultiplierR", name = "R damge multiplier", value = 10, min = 10, max = 30, step = 1, , identifier = "%"})
   self.Menu.combo:MenuElement({id = "ignite", name = "Ignite in Combo", value = true})
   self.Menu.combo:MenuElement({id = "ignitehp", name = "Ignite HP:", value = 35, min = 5, max = 95, identifier = "%"})
   self.Menu.combo:MenuElement({id = "exaust", name = "Exhaust in Combo", value = true})
@@ -224,7 +224,7 @@ function Brand:Combo()
 
           if self.Menu.combo.R:Value() and lastQ + 750 and Ready(_R)
             and distanceSqr < 625*625 and IsValid(target)
-            and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*3 > hero.health)  then
+            and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*(self.Menu.combo.dmgMultiplierR:Value()/10) > hero.health)  then
             Control.CastSpell(HK_R, hero)
             lastR = GetTickCount()
           end
@@ -423,7 +423,7 @@ function Brand:Combo()
 
         if self.Menu.combo.R:Value() and lastR + 750 and Ready(_R)
           and IsValid(target)
-          and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*2 > hero.health)  then
+          and (numAround >= self.Menu.combo.minComboR:Value() or RDmg*(self.Menu.combo.dmgMultiplierR:Value()/10) > hero.health)  then
           Control.CastSpell(HK_R, hero)
           lastR = GetTickCount()
         end
