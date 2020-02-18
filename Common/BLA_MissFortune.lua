@@ -89,6 +89,10 @@ function MissFortune:Tick()
   if myHero.dead or Game.IsChatOpen() or (ExtLibEvade and ExtLibEvade.Evading == true) then
     return
   end
+  
+    if inUlt == true then 
+	return false 
+  end
 
   --self:Auto()
 
@@ -112,7 +116,7 @@ end
 
 function MissFortune:Combo()
 
-  if inUlt == true then return false end
+
   local target = nil
 
   -- R Start
@@ -128,8 +132,7 @@ function MissFortune:Combo()
         local RDmg = getdmg("R", hero, myHero, 1)
 
         if self.Menu.combo.R:Value() and maxDistance > 0 then
-          _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
-
+	
           local Pred = GetGamsteronPrediction(hero, self.R, myHero)
           -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
           if (numAround >= self.Menu.combo.minComboR:Value())
@@ -140,17 +143,21 @@ function MissFortune:Combo()
             or (self.Menu.combo.RHighKSChange:Value()
             and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/(self.Menu.combo.comboUltConfig.highDamageDivisor:Value()/10) > hero.health) then
 
-            inUlt=true
-			_G.SDK.Orbwalker:SetMovement(false)
+           
             Control.CastSpell(HK_R, Pred.CastPosition)
             lastR = GetTickCount()
+			 inUlt=true
+		  _G.SDK.Orbwalker:SetAttack(false)
+          _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
 
+			
             -- MOV AFTER 3 + 0.20
             DelayAction(
               function()
                 _G.SDK.Orbwalker:SetMovement(true)
+				_G.SDK.Orbwalker:SetAttack(true)
                 inUlt=false
-              end, 3 + 0.20
+              end, 3.20
             )
             return
 
