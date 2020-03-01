@@ -1,10 +1,14 @@
 require("BLA_Common") -- load common functions
 require('GamsteronPrediction')
 require('PussyDamageLib')
+require('Alpha')
 
 local LocalTableSort        = table.sort
 local LocalStringFind       = string.find
+LocalGeometry = _G.Alpha.Geometry
+
 local inUlt = false
+local initUltHealth = 0
 
 class "MissFortune"
 
@@ -70,6 +74,9 @@ function MissFortune:LoadMenu()
   self.Menu.clear:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.clear:MenuElement({id = "E", name = "E", value = false})
 
+  self.Menu:MenuElement({type = MENU, id = "auto", name = "Auto"})
+  self.Menu.auto:MenuElement({id = "bounce", name = "Q Logic Bounce by Sikaka", value = true})
+
   self.Menu:MenuElement({type = MENU, id = "lastHit", name = "LastHit"})
   self.Menu.lastHit:MenuElement({id = "Q", name = "Q", value = true})
   self.Menu.lastHit:MenuElement({id = "E", name = "E", value = true})
@@ -89,9 +96,14 @@ function MissFortune:Tick()
   if myHero.dead or Game.IsChatOpen() or (ExtLibEvade and ExtLibEvade.Evading == true) then
     return
   end
-  
-    if inUlt == true then 
-	return false 
+
+  if inUlt == true and initUltHealth >= myHero.health then
+    return false
+  end
+
+  if self.Menu.auto.bounce:Value()  and lastQ +70 and Ready(_Q) then
+
+    self:Bounce()
   end
 
   --self:Auto()
@@ -114,6 +126,72 @@ function MissFortune:Tick()
 
 end
 
+
+-- Bounce logic ALMOST ALL Credits for Sikaka
+function MissFortune:Bounce()
+  --All the traditional Q logic
+  if Ready(_Q) then
+    local target =  self:GetTarget(self.Q.range)
+    if target and IsValid(target) then
+      local bounceTarget = GetQBounceTarget(target)
+      if IsValid(bounceTarget) and LocalStringFind(bounceTarget.type, "Hero") then
+        --Check for killsteal
+        local WDmg = getdmg("Q", bounceTarget, myHero, 1)
+        if WDmg >= bounceTarget.health then
+          local Pred = GetGamsteronPrediction(target, self.Q, myHero)
+          if Pred.Hitchance >= _G.HITCHANCE_NORMAL then
+            Control.CastSpell(HK_Q, target.pos)
+            lastQ = GetTickCount()
+            return
+          end
+        end
+        -- bounce with enemy
+        if lastQ +170 < GetTickCount() and Ready(_Q)  then
+          for i = 1, #Enemys do
+            local hero1 = Enemys[i]
+            if IsValid(hero1) then
+
+              -- Check have enemy hero near
+              local hero2 = self:GetHeroInRange(160, hero1)
+              if hero2 ~= hero1 then
+                local Pred = GetGamsteronPrediction(hero2, self.Q, myHero)
+                if IsValid(hero2) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
+                  Control.CastSpell(HK_Q, hero1.pos)
+                  lastQ = GetTickCount()
+                  return
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    --Minion bounce: only calculate if there are enemies we could bounce to
+    if NearestEnemy(myHero.pos, 1000) ~= nil then
+      local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
+      for i = 1,#eMinions do
+        local minion = eMinions[i]
+
+        if IsValid(minion) and LocalGeometry:IsInRange(myHero.pos, minion.pos, self.Q.range) then
+          local minionHp = _G.SDK.HealthPrediction:GetPrediction(minion, self.Q.delay)
+          if minionHp > 0 then
+            local bounceTarget = GetQBounceTarget(minion)
+
+            if IsValid(bounceTarget) and LocalStringFind(bounceTarget.type, "Hero") then
+              Control.CastSpell(HK_Q, minion.pos)
+              lastQ = GetTickCount()
+              return
+            end
+          end
+        end
+      end
+    end
+  end
+
+end
+
+
 function MissFortune:Combo()
 
 
@@ -132,7 +210,7 @@ function MissFortune:Combo()
         local RDmg = getdmg("R", hero, myHero, 1)
 
         if self.Menu.combo.R:Value() and maxDistance > 0 then
-	
+
           local Pred = GetGamsteronPrediction(hero, self.R, myHero)
           -- solta r quando tem muito inimigo, ou inimigo esta imovel e chance de matar ou muita quando tem chance de matar
           if (numAround >= self.Menu.combo.minComboR:Value())
@@ -143,21 +221,22 @@ function MissFortune:Combo()
             or (self.Menu.combo.RHighKSChange:Value()
             and Pred.Hitchance >= _G.HITCHANCE_HIGH or RDmg/(self.Menu.combo.comboUltConfig.highDamageDivisor:Value()/10) > hero.health) then
 
-           
+
             Control.CastSpell(HK_R, Pred.CastPosition)
             lastR = GetTickCount()
-			 inUlt=true
-		  _G.SDK.Orbwalker:SetAttack(false)
-          _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
+            inUlt=true
+            _G.SDK.Orbwalker:SetAttack(false)
+            _G.SDK.Orbwalker:SetMovement(false) -- Stop moviment in R
+            initUltHealth=myHero.health
 
-			
             -- MOV AFTER 3 + 0.20
             DelayAction(
               function()
                 _G.SDK.Orbwalker:SetMovement(true)
-				_G.SDK.Orbwalker:SetAttack(true)
+                _G.SDK.Orbwalker:SetAttack(true)
                 inUlt=false
-              end, 3.20
+                
+              end, 3.0
             )
             return
 
@@ -180,6 +259,7 @@ function MissFortune:Combo()
     if Pred.Hitchance >= _G.HITCHANCE_HIGH then
       if target and self.Menu.combo.E:Value() then
         Control.CastSpell(HK_E,Pred.CastPosition)
+        lastE = GetTickCount()
       end
     end
   end
@@ -189,6 +269,7 @@ function MissFortune:Combo()
   target = self:GetTarget(1200)
   if self.Menu.combo.W:Value()  and lastW +120  < GetTickCount() and Ready(_W) and IsValid(target) then
     Control.CastSpell(HK_W)
+    lastW = GetTickCount()
   end
   -- W End
 
@@ -216,41 +297,7 @@ end
 function MissFortune:Harass()
   if inUlt == true then return false end
 
-  -- bounce with minion
-  if self.Menu.harass.Qminion:Value() and  lastQ +170 < GetTickCount() and Ready(_Q) then
-    local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
-    for i = 1, #eMinions do
-      local minion = eMinions[i]
-      if IsValid(minion) then
-        -- Check have enemy hero near
-        local hero = self:GetHeroInRange(390, minion)
-        local Pred = GetGamsteronPrediction(hero, self.Q, myHero)
-
-        if IsValid(hero) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
-          Control.CastSpell(HK_Q, minion.pos)
-        end
-
-      end
-    end
-  end
-
-  -- bounce with enemy
-  if self.Menu.harass.Qenemy:Value() and  lastQ +170 < GetTickCount() and Ready(_Q)  then
-    for i = 1, #Enemys do
-      local hero1 = Enemys[i]
-      if IsValid(hero1) then
-
-        -- Check have enemy hero near
-        local hero2 = self:GetHeroInRange(390, hero1)
-        if hero2 ~= hero1 then
-          local Pred = GetGamsteronPrediction(hero2, self.Q, myHero)
-          if IsValid(hero2) and Pred.Hitchance >= _G.HITCHANCE_NORMAL then
-            Control.CastSpell(HK_Q, hero1.pos)
-          end
-        end
-      end
-    end
-  end
+  self:Bounce()
 
   if self.Menu.harass.E:Value()  and lastE +180  < GetTickCount() and Ready(_E)  then
     for i = 1, #Enemys do
@@ -259,6 +306,7 @@ function MissFortune:Harass()
       if Pred.Hitchance >= _G.HITCHANCE_HIGH then
         if target and self.Menu.harass.E:Value() and IsValid(hero) then
           Control.CastSpell(HK_E,Pred.CastPosition)
+          lastE = GetTickCount()
         end
       end
     end
@@ -279,9 +327,10 @@ function MissFortune:Clear()
       and myHero.pos:DistanceTo(minion.pos) < 650 then
 
       if self.Menu.clear.Q:Value()
-        and  lastQ +170 < GetTickCount()
+        and  lastQ +70 < GetTickCount()
         and Ready(_Q) then
         Control.CastSpell(HK_Q, minion)
+        lastQ = GetTickCount()
       end
 
       local count = GetMinionCount(310, minion)
@@ -289,6 +338,7 @@ function MissFortune:Clear()
         and lastE +180  < GetTickCount()
         and Ready(_E) and count>1 then
         Control.CastSpell(HK_E, minion)
+        lastE = GetTickCount()
       end
 
     end
@@ -306,11 +356,12 @@ function MissFortune:LastHit()
       local minion = eMinions[i]
       if IsValid(minion) then
         if myHero.pos:DistanceTo(minion.pos) < 650 and Ready(_Q) then
-          if self.Menu.lastHit.Q:Value() and lastQ +170  < GetTickCount() then
+          if self.Menu.lastHit.Q:Value() and lastQ +70  < GetTickCount() then
 
             local WDmg = getdmg("Q", minion, myHero, 1)
             if (WDmg > minion.health) then
               Control.CastSpell(HK_Q, minion.pos)
+              lastQ = GetTickCount()
               return
             end
 
@@ -325,6 +376,7 @@ function MissFortune:LastHit()
       if self.Menu.lastHit.E:Value() and  lastE +180  < GetTickCount()
         and Ready(_E) and (WDmg > minion.health) then
         Control.CastSpell(HK_E, minion.pos)
+        lastE = GetTickCount()
         return
       end
 
@@ -400,6 +452,80 @@ function MissFortune:GetHeroInRange(range, target)
     end
   end
 end
+
+
+
+function NearestEnemy(origin, range)
+  local enemy = nil
+  local distance = range
+  for i = 1,#Enemys do
+    local hero = Enemys[i]
+    if hero and IsValid(hero) then
+      local d =  LocalGeometry:GetDistance(origin, hero.pos)
+      if d < range  and d < distance  then
+        distance = d
+        enemy = hero
+      end
+    end
+  end
+  if distance < range then
+    return enemy, distance
+  end
+end
+
+
+function GetQBounceTarget(target)
+  if not target then return end
+
+  local bounceTargetDelay = LocalGeometry:InterceptTime(myHero, target,0.25 , 1800)
+  local targetOrigin = LocalGeometry:PredictUnitPosition(target, bounceTargetDelay)
+
+  if not LocalGeometry:IsInRange(myHero.pos, targetOrigin, 650) then return end
+
+  local topVector = targetOrigin +(targetOrigin - myHero.pos):Perpendicular():Normalized()* 500
+  local bottomVector = targetOrigin +(targetOrigin - myHero.pos):Perpendicular2():Normalized()* 500
+
+
+  local targets = {}
+  local eMinions = SDK.ObjectManager:GetEnemyMinions(650)
+
+  for i = 1, #eMinions do
+    local hero = eMinions[i]
+
+    if IsValid(hero) and hero.networkID ~= target.networkID then
+      local heroOrigin = LocalGeometry:PredictUnitPosition(hero, bounceTargetDelay)
+
+      if LocalGeometry:IsInRange(targetOrigin, heroOrigin, 400 + hero.boundingRadius) and
+        not LocalGeometry:IsInRange(topVector, heroOrigin, 350 - hero.boundingRadius) and
+        not LocalGeometry:IsInRange(bottomVector, heroOrigin, 350 - hero.boundingRadius) and
+        LocalGeometry:GetDistanceSqr(myHero.pos, heroOrigin) > LocalGeometry:GetDistanceSqr(myHero.pos, targetOrigin) then
+        targets[#targets + 1] = {t = hero, d = LocalGeometry:GetDistance(targetOrigin, heroOrigin)}
+      end
+    end
+  end
+
+  for i = 1, #Enemys do
+
+    local hero = Enemys[i]
+
+    if IsValid(hero) and hero.networkID ~= target.networkID then
+      local heroOrigin = LocalGeometry:PredictUnitPosition(hero, bounceTargetDelay )
+      if LocalGeometry:IsInRange(targetOrigin, heroOrigin, 400 + hero.boundingRadius) and
+        not LocalGeometry:IsInRange(topVector, heroOrigin, 350 - hero.boundingRadius) and
+        not LocalGeometry:IsInRange(bottomVector, heroOrigin, 350 - hero.boundingRadius) and
+        LocalGeometry:GetDistanceSqr(myHero.pos, heroOrigin) > LocalGeometry:GetDistanceSqr(myHero.pos, targetOrigin) then
+        targets[#targets + 1] = {t = hero, d = LocalGeometry:GetDistance(targetOrigin, heroOrigin)}
+      end
+    end
+  end
+
+  if #targets > 0 then
+    LocalTableSort(targets, function (a,b) return a.d < b.d end)
+    return targets[1].t
+  end
+
+end
+
 
 
 MissFortune()
