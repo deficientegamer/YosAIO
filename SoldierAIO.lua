@@ -14,14 +14,15 @@ end
 -- globals
 local version = 0.06
 local hero = myHero.charName
-if hero == "Brand" or hero == "MissFortune" or hero == "Poppy" or hero == "Galio" or hero == "Zed" then
-  print("SoldierAIO 0.06 loading...")
+if hero == "Brand" or hero == "MissFortune" or hero == "Poppy" or hero == "Galio" or hero == "Zed" 
+       or hero == "Sett" then
+  print("SoldierAIO 0.07 loading...")
   Callback.Add("Load", function()
     DelayAction(function()
       if not AIO then
         AIO = true
         require("BLA_".. hero)
-       print("SoldierAIO 0.06 To ensure the functioning press f6 x 2")
+       print("SoldierAIO 0.07 To ensure the functioning press f6 x 2")
       end
     end, 2)
   end)
