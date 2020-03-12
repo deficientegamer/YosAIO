@@ -130,3 +130,41 @@ Clear
 
 Escape
 - W
+
+
+# Darius
+
+Combo
+- Q
+- E
+- AA
+- W
+- R (Calcule KS / Level / Reset)
+- Ignite
+- Exaust
+
+Lasthit
+- Q
+- W
+
+Harass
+- Q
+- E
+- W
+
+Clear
+- Q
+- W
+- E
+
+
+Jungle Clear
+- Q
+- W
+- E
+
+Escape
+- Exaust
+
+Extras
+- Mana Control
