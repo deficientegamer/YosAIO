@@ -192,10 +192,10 @@ function Sett:Harass()
   if target == nil then return end
   if IsValid(target) then
 
-    if myHero.pos:DistanceTo(target.pos) < 750 and Menu.Combo.UseW:Value() and Ready(_W)
+    if myHero.pos:DistanceTo(target.pos) < 750 and Menu.Harass.UseW:Value() and Ready(_W)
       and myHero.mana/myHero.maxMana >= Menu.Harras.Grit:Value() / 100 then
 
-      local pred = GetGamsteronPrediction(target, self.E, myHero)
+      local pred = GetGamsteronPrediction(target, self.W, myHero)
       if pred.Hitchance >= Menu.Pred.PredW:Value()+1 then
         Control.CastSpell(HK_W, pred.CastPosition)
       end
@@ -211,7 +211,7 @@ function Sett:Clear()
     if myHero.pos:DistanceTo(minion.pos) <= 800 and minion.team == TEAM_ENEMY and IsValid(minion) then
 
 
-      if myHero.pos:DistanceTo(minion.pos) <= 490 and Menu.Clear.UseW:Value() and Ready(_E) then
+      if myHero.pos:DistanceTo(minion.pos) <= 490 and Menu.Clear.UseE:Value() and Ready(_E) then
         local count = GetMinionCount(160, minion)
         if count >= Menu.Clear.Emin:Value() then
           Control.CastSpell(HK_E, minion.pos)
