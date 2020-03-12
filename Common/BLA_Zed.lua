@@ -42,7 +42,7 @@ end
 
 function Zed:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAZed", name = "SoldierAIO Zed RC 0.1"})
+  self.Menu = MenuElement({type = MENU, id = "BLAZed", name = "YosAIO (Soldier AIO) Zed RC 0.1"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "maxComboEnemies", name = "Max Enemies near target in combo", value = 1, min = 0, max = 4, step = 1})

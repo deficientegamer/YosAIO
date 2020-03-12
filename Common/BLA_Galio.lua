@@ -42,7 +42,7 @@ end
 
 function Galio:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAGalio", name = "SoldierAIO Galio RC 0.1"})
+  self.Menu = MenuElement({type = MENU, id = "BLAGalio", name = "YosAIO (Soldier AIO) Galio RC 0.1"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})

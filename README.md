@@ -1,4 +1,4 @@
-# SoldierAIO
+# YosAIO (Soldier AIO)
 This repo is an GOS-EXT AIO 
 
 # Details

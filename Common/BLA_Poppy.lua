@@ -43,7 +43,7 @@ end
 
 function Poppy:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLAPoppy", name = "SoldierAIO Poppy RC 0.2"})
+  self.Menu = MenuElement({type = MENU, id = "BLAPoppy", name = "YosAIO (Soldier AIO) Poppy RC 0.2"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})

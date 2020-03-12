@@ -38,7 +38,7 @@ end
 
 function Brand:LoadMenu()
 
-  self.Menu = MenuElement({type = MENU, id = "BLABrand", name = "SoldierAIO Brand RC 0.4"})
+  self.Menu = MenuElement({type = MENU, id = "BLABrand", name = "YosAIO (Soldier AIO) Brand RC 0.4"})
 
   self.Menu:MenuElement({type = MENU, id = "combo", name = "Combo"})
   self.Menu.combo:MenuElement({id = "Q", name = "Q", value = true})
