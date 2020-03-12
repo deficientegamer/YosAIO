@@ -122,6 +122,22 @@ function IsSendUnderTurretAlly(myHero,unit)
   return false
 end
 
+
+function IsSendUnderTurretEnemy(myHero,unit)
+
+  for i = 1, Game.TurretCount() do
+    local turret = Game.Turret(i)
+
+    if turret.isAlly == false and not turret.dead then
+      if turret.pos:DistanceTo(unit.pos) < 1200 then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+
 function OnAllyHeroLoad(cb)
   for i = 1, GameHeroCount() do
     obj = GameHero(i)

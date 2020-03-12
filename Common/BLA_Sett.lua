@@ -128,15 +128,40 @@ function Sett:Tick()
 end
 
 function Sett:Combo()
-  print("0")
+
   local target = self:GetTarget(800)
-    print(target)
   if target == nil then return end
-  print("1")
   if IsValid(target) then
- print("2")
-    if myHero.pos:DistanceTo(target.pos) < 400 and Menu.Combo.UseR:Value() and Ready(_R)  then
+
+    local finalPos = target.pos:Extended(myHero.pos, -690)
+
+    -- Logica para mandar para torre aliada
+    if IsSendUnderTurretAlly(myHero,finalPos) then
+      if myHero.pos:DistanceTo(target.pos) < 400 and Menu.Combo.UseR:Value() and Ready(_R)  then
+
+        Control.CastSpell(HK_R, target)
+
+      end
+
+    end
+
+    if myHero.pos:DistanceTo(target.pos) < 400 and Menu.Combo.UseR:Value() and Ready(_R)
+      and IsSendUnderTurretEnemy(myHero,finalPos) == false then
       if target.health/target.maxHealth <= Menu.Combo.HP:Value() / 100 then
+        Control.CastSpell(HK_R, target)
+      end
+    end
+
+    if myHero.pos:DistanceTo(target.pos) < 400 and Menu.Combo.UseR:Value() and Ready(_R)
+      and IsSendUnderTurretEnemy(myHero,finalPos) == true then
+
+      checkKS =  Menu.Combo.HP:Value()
+
+      if checkKS > 15 then
+        checkKS = checkKS - 10
+      end
+
+      if target.health/target.maxHealth <= checkKS / 100 then
         Control.CastSpell(HK_R, target)
       end
     end
@@ -151,7 +176,7 @@ function Sett:Combo()
 
     if myHero.pos:DistanceTo(target.pos) < 750 and Menu.Combo.UseW:Value() and Ready(_W) and myHero.mana/myHero.maxMana >= Menu.Combo.Grit:Value() / 100 then
 
-      local pred = GetGamsteronPrediction(target, self.E, myHero)
+      local pred = GetGamsteronPrediction(target, self.W, myHero)
       if pred.Hitchance >= Menu.Pred.PredW:Value()+1 then
         Control.CastSpell(HK_W, pred.CastPosition)
       end
