@@ -159,7 +159,7 @@ function Darius:Auto()
   if target == nil then return end
 
   -- E Logic to send tower ally
-  local finalPos = target.pos:Extended(myHero.pos, -490)
+  local finalPos = target.pos:Extended(myHero.pos, 0)
 
   -- Logica para mandar para torre aliada
   if IsSendUnderTurretAlly(myHero,finalPos) then
