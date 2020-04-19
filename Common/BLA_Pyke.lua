@@ -1,39 +1,14 @@
 require("BLA_Common") -- load common functions
 require('GamsteronPrediction')
-require('PussyDamageLib')
 
 GameMinionCount      = Game.MinionCount;
-
 GameMinion         = Game.Minion;
-
 GameTimer        = Game.Timer;
-
 
 class "Pyke"
 
-local function GetEnemyHeroes()
-  return Enemies
-end
-
 local function QCastTime(unit)
   return (((myHero.pos:DistanceTo(unit) - 400) / 140) / 10) + 0.75
-end
-
-function GetMinionCount(range, pos)
-  local pos = pos.pos
-  local count = 0
-  for i = 1,Game.MinionCount() do
-    local hero = Game.Minion(i)
-    local Range = range * range
-    if hero.team ~= TEAM_ALLY and hero.dead == false and GetDistanceSquared(pos, hero.pos) < Range then
-      count = count + 1
-    end
-  end
-  return count
-end
-
-local function GetEnemyHeroes()
-  return Enemies
 end
 
 local function HasBuff(unit, buffname)
@@ -66,37 +41,15 @@ end
 
 function Pyke:__init()
 
-  EData =
-    {
-      Type = _G.SPELLTYPE_LINE, Collision = false, Delay = 0.28, Radius = 60, Range = 550, Speed = 500
-    }
-
-  EspellData = {speed = 500, range = 550, delay = 0.28, radius = 60, collision = {}, type = "linear"}
-
-  QData =
-    {
-      Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 55, Range = 1000, Speed = 1700, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_YASUOWALL}
-    }
-
-
-  QDataJungle =
-    {
-      Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 55, Range = 1000, Speed = 1700, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_YASUOWALL}
-    }
-
-  QspellData = {speed = 1700, range = 1000, delay = 0.25, radius = 55, collision = {"minion"}, type = "linear"}
-
-  RData =
-    {
-      Type = _G.SPELLTYPE_CIRCLE, Collision = false, Delay = 0.5, Radius = 250, Range = 750, Speed = 1000
-    }
-
-  RspellData = {speed = 1000, range = 750, delay = 0.5, radius = 250, collision = {}, type = "circular"}
-
-
+  -- dados dos feiticos
+  EData = { Type = _G.SPELLTYPE_LINE, Collision = false, Delay = 0.28, Radius = 60, Range = 550, Speed = 500  }
+  QData = { Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 55, Range = 1000, Speed = 1700, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_YASUOWALL}   }
+  QDataJungle =  { Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 55, Range = 1000, Speed = 1700, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_YASUOWALL}    }
+  RData =  { Type = _G.SPELLTYPE_CIRCLE, Collision = false, Delay = 0.5, Radius = 250, Range = 750, Speed = 1000 }
 
   self:LoadMenu()
-
+  
+  
   OnAllyHeroLoad(function(hero)
     TableInsert(Allys, hero);
   end)
@@ -104,6 +57,7 @@ function Pyke:__init()
   OnEnemyHeroLoad(function(hero)
     TableInsert(Enemys, hero);
   end)
+  
 
   Callback.Add("Tick", function() self:Tick() end)
 
@@ -130,7 +84,6 @@ function Pyke:LoadMenu()
   Menu.Combo:MenuElement({id = "QRange", name = "Use[Q] if range bigger than -->", value = 400, min = 0, max = 1100, step = 10})
   Menu.Combo:MenuElement({id = "UseE", name = "[E]", value = true})
   Menu.Combo:MenuElement({id = "UseR", name = "[R] Kill", value = true})
-  Menu.Combo:MenuElement({id = "Draw", name = "Draw Killable FullCombo[onScreen+Minimap]", value = true})
   Menu.Combo:MenuElement({type = MENU, id = "W", name = "W Setting"})
   Menu.Combo.W:MenuElement({id = "UseW", name = "[W]", value = true})
   Menu.Combo.W:MenuElement({id = "WRange", name = "Use[W] if range bigger than -->", value = 500, min = 0, max = 1000, step = 10})
@@ -154,7 +107,6 @@ function Pyke:LoadMenu()
 
   --Prediction
   Menu:MenuElement({type = MENU, id = "Pred", name = "Prediction"})
-  Menu.Pred:MenuElement({id = "Change", name = "Change Prediction Typ", value = 1, drop = {"Gamsteron Prediction"}})
   Menu.Pred:MenuElement({id = "PredQ", name = "Hitchance[Q]", value = 1, drop = {"Normal", "High", "Immobile"}})
   Menu.Pred:MenuElement({id = "PredE", name = "Hitchance[E]", value = 1, drop = {"Normal", "High", "Immobile"}})
   Menu.Pred:MenuElement({id = "PredR", name = "Hitchance[R]", value = 1, drop = {"Normal", "High", "Immobile"}})
@@ -168,20 +120,14 @@ function Pyke:Tick()
     return
   end
 
-
-
   if Orb.Modes[ORBWALKER_MODE_COMBO] then
     self:Ult()
     self:Combo()
-    --   self:castIginite()
-    -- self:castExaust()
   elseif Orb.Modes[ORBWALKER_MODE_HARASS] then
     self:Harass()
   elseif Orb.Modes[ORBWALKER_MODE_LANECLEAR] then
     self:Clear()
     self:JungleClear()
-  elseif Orb.Modes[ORBWALKER_MODE_FLEE] then
-  --self:castExaust()
   end
 
 end
@@ -213,6 +159,7 @@ end
 function Pyke:Combo()
 
   local target = self:GetTarget(1050)
+  
   if target == nil then return end
   if IsValid(target) then
 
@@ -316,40 +263,6 @@ function Pyke:Clear()
     if myHero.pos:DistanceTo(minion.pos) <= 400 and minion.team == TEAM_ENEMY and IsValid(minion) then
 
 
-      -- cast Q
-      if Menu.Clear.UseQ:Value() and Ready(_Q) and myHero.pos:DistanceTo(minion.pos) >= Menu.Clear.QRange:Value()
-        and myHero.pos:DistanceTo(minion.pos) < 400 then
-
-        local pred = GetGamsteronPrediction(minion, QData, myHero)
-        local Time = QCastTime(pred.CastPosition)
-
-        if pred.Hitchance >= Menu.Pred.PredQ:Value()+1 then
-
-          CastQReady = true
-
-          -- Apertar o Q
-          Control.KeyDown(HK_Q)
-
-          _G.SDK.Orbwalker:SetAttack(false)
-
-          -- Soltar o q
-          DelayAction(
-            function()
-
-              _G.SDK.Orbwalker:SetMovement(false)
-              Control.SetCursorPos(pred.CastPosition) -- Coloco em cima do cara
-              Control.KeyUp(HK_Q) -- Libero o Q
-
-              -- Libero movimentos
-              _G.SDK.Orbwalker:SetMovement(true)
-              _G.SDK.Orbwalker:SetAttack(true)
-              CastQReady = false
-
-            end, Time
-          )
-        end
-      end
-
 
       -- cast E
       if Menu.Clear.UseE:Value() and myHero.pos:DistanceTo(minion.pos) > 100 and myHero.pos:DistanceTo(minion.pos) <= 400
@@ -371,16 +284,14 @@ function Pyke:JungleClear()
   for i = 1, GameMinionCount() do
     local minion = GameMinion(i)
     if myHero.pos:DistanceTo(minion.pos) <= 1000 and minion.team == TEAM_JUNGLE and IsValid(minion) then
-      print("1")
       -- cast Q
       if Menu.Jungle.UseQ:Value() and Ready(_Q) and myHero.pos:DistanceTo(minion.pos) >= Menu.Jungle.QRange:Value()
         and myHero.pos:DistanceTo(minion.pos) < 1000 then
-        print("2")
+
         local pred = GetGamsteronPrediction(minion, QDataJungle, myHero)
         local Time = QCastTime(pred.CastPosition)
 
         if pred.Hitchance >= Menu.Pred.PredQ:Value()+1 then
-          print("3")
           CastQReady = true
 
           -- Apertar o Q
@@ -391,7 +302,7 @@ function Pyke:JungleClear()
           -- Soltar o q
           DelayAction(
             function()
-              print("4")
+
               _G.SDK.Orbwalker:SetMovement(false)
               Control.SetCursorPos(pred.CastPosition) -- Coloco em cima do cara
               Control.KeyUp(HK_Q) -- Libero o Q
@@ -426,24 +337,9 @@ function Pyke:JungleClear()
 end
 
 
-function GetMinionCount(range, pos)
-  local pos = pos.pos
-  local count = 0
-  for i = 1,Game.MinionCount() do
-    local hero = Game.Minion(i)
-    local Range = range * range
-    if hero.team ~= TEAM_ALLY and hero.dead == false and GetDistanceSquared(pos, hero.pos) < Range then
-      count = count + 1
-    end
-  end
-  return count
-end
-
-
-
-
 function Pyke:GetTarget(range, list)
-  local targetList = {}
+
+   local targetList = {}
   local inputList = list or Enemys
   for i = 1, #inputList do
     local hero = inputList[i]
@@ -453,24 +349,8 @@ function Pyke:GetTarget(range, list)
   end
 
   return TargetSelector:GetTarget(targetList)
+
 end
-
-function Pyke:GetTargetInRange(range, target)
-  local counter = 0
-  for i = 1, #Enemys do
-    local hero = Enemys[i]
-    if IsValid(hero) then
-      if GetDistanceSquared(target.pos, hero.pos) < range * range then
-        counter = counter + 1
-      end
-    end
-  end
-  return counter
-end
-
-
-
-
 
 
 Pyke()
